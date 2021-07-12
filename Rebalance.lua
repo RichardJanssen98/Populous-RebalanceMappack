@@ -20,25 +20,20 @@ import(Module_Table)
 import(Module_Math)
 include("UtilRefs.lua")
 include("Vehicle.lua")
-
-function FlagSet(_f1, _f2)
-    if (_f1 & _f2 == 0) then
-        _f1 = _f1 | _f2
-    end
-    return _f1
-end
+include("Swampy.lua")
 
 sti = spells_type_info();
 _constants = constants();
 initializedShamanHealth = 0
-
-sti[M_SPELL_ARMAGEDDON].Cost = 200000;
 
 sti[M_SPELL_INVISIBILITY].Cost = 75000;
 InvisNumPeopleAffected = 3;
 
 aliveShamans = {}
 deadShamans = {}
+deadShamansIntArray = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+
+swampyTable = {}
 
 vehiclesTable = {}
 vehicleHealth = 1000
@@ -52,32 +47,10 @@ vehicleDamageFirestormExplosions = 100
 vehicleDamageVolcanoBigRockExplosions = 250
 vehicleDamageVolcanoSmallRockExplosions = 150
 
-blueShamSwampDeath = 0
-redShamSwampDeath = 0
-yellowShamSwampDeath = 0
-greenShamSwampDeath = 0
-cyanShamSwampDeath = 0
-pinkShamSwampDeath = 0
-blackShamSwampDeath = 0
-orangeShamSwampDeath = 0
-
-blueShamAngelDeath = 0
-redShamAngelDeath = 0
-yellowShamAngelDeath = 0
-greenShamAngelDeath = 0
-cyanShamAngelDeath = 0
-pinkShamAngelDeath = 0
-blackShamAngelDeath = 0
-orangeShamAngelDeath = 0
-
-blueShamSwarmHit = 0
-redShamSwarmHit = 0
-yellowShamSwarmHit = 0
-greenShamSwarmHit = 0
-cyanShamSwarmHit = 0
-pinkShamSwarmHit = 0
-blackShamSwarmHit = 0
-orangeShamSwarmHit = 0
+shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+shamAngelDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+shamSwarmHitBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+shamSwampDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 
 _constants.InvisNumPeopleAffected = 1;
 _constants.ShieldNumPeopleAffected = 1;
@@ -109,13 +82,15 @@ _gsi = gsi();
 -- this might not work, in which case you might wanna check
 --  for T_SPELL && M_SPELL_ARMAGEDDON inside OnCreateThing
 sti[M_SPELL_ARMAGEDDON].EffectModels[3] = M_SPELL_HILL; 
+_gsi.CurrLevelFlags = _gsi.CurrLevelFlags ~ LEVEL_FLAGS_NO_GUEST
+_gsi.CurrLevelFlags = _gsi.CurrLevelFlags | GS_GUEST_SPELLS_CHARGE
 
 function OnTurn()
-  GIVE_MANA_TO_PLAYER(TRIBE_BLUE, 9999)
-  GIVE_MANA_TO_PLAYER(TRIBE_RED, 9999)
-
   if (initializedShamanHealth == 0) then
     for i=0, 7 do
+      --_gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable | (1 << M_SPELL_ARMAGEDDON)
+      --_gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging ~ (1 << M_SPELL_ARMAGEDDON-1)
+      
       local shaman = getShaman(i)
 
       if (shaman ~= nil) then
@@ -123,8 +98,10 @@ function OnTurn()
       end
     end
     initializedShamanHealth = 1
-    _gsi.CurrLevelFlags = _gsi.CurrLevelFlags ~ LEVEL_FLAGS_NO_GUEST
-    _gsi.CurrLevelFlags = _gsi.CurrLevelFlags | GS_GUEST_SPELLS_CHARGE
+    sti[M_SPELL_ARMAGEDDON].OneOffMaximum = 3
+    sti[M_SPELL_ARMAGEDDON].Cost = 200000;
+    sti[M_SPELL_ARMAGEDDON].OptimalChargeSecs = 240
+    sti[M_SPELL_ARMAGEDDON].WorldCoordRange = 4096
 
     --Put any vehicles into the vehicles list just in case the map has some pre made vehicles
     ProcessGlobalTypeList(T_VEHICLE, function(t)
@@ -137,101 +114,46 @@ function OnTurn()
     end)
   end
 
-  if (everyPow(12, 1)) then
-    aliveShamans = {}
+  if (everyPow(36, 1)) then
+    for i, sham in pairs(aliveShamans) do
+      if (sham ~= nil) then
+        shamFindBools[sham.Owner] = 1
+      end
+    end
+
     for i=0, 7 do
-      table.insert(aliveShamans, getShaman(i))
+      if (shamFindBools[i] == 0) then
+        local sham  = getShaman(i)
+        if (sham ~= nil) then
+          table.insert(aliveShamans, sham)
+        end
+      end
     end
 
     for i, sham in pairs(aliveShamans) do
       if (sham ~= nil) then
         if (sham.State == S_PERSON_AOD2_VICTIM) then
-          if (sham.Owner == TRIBE_BLUE) then
-            blueShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_RED) then
-            redShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_YELLOW) then
-            yellowShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_GREEN) then
-            greenShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_CYAN) then
-            cyanShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_PINK) then
-            pinkShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_BLACK) then
-            blackShamAngelDeath = 1
-          end
-          if (sham.Owner == TRIBE_ORANGE) then
-            orangeShamAngelDeath = 1
-          end
+          shamAngelDeathBools[sham.Owner] = 1
         end
       end
+
+      shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
     end
   end
 
   if (everyPow(1, 1)) then
-    if (getShaman(TRIBE_BLUE) == nil and blueShamAngelDeath == 1) then
-      blueShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_RED) == nil and redShamAngelDeath == 1) then
-      redShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_YELLOW) == nil and yellowShamAngelDeath == 1) then
-      yellowShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_GREEN) == nil and greenShamAngelDeath == 1) then
-      greenShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_CYAN) == nil and cyanShamAngelDeath == 1) then
-      cyanShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_PINK) == nil and pinkShamAngelDeath == 1) then
-      pinkShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_BLACK) == nil and blackShamAngelDeath == 1) then
-      blackShamAngelDeath = 0
-    end
-    if (getShaman(TRIBE_ORANGE) == nil and orangeShamAngelDeath == 1) then
-      orangeShamAngelDeath = 0
-    end
-
     for i, sham in pairs(aliveShamans) do
-      if ((sham.Owner == TRIBE_BLUE and blueShamAngelDeath == 1) or (sham.Owner == TRIBE_RED and redShamAngelDeath == 1) or (sham.Owner == TRIBE_YELLOW and yellowShamAngelDeath == 1) or (sham.Owner == TRIBE_GREEN and greenShamAngelDeath == 1) or (sham.Owner == TRIBE_CYAN and cyanShamAngelDeath == 1) or (sham.Owner == TRIBE_PINK and pinkShamAngelDeath == 1) or (sham.Owner == TRIBE_BLACK and blackShamAngelDeath == 1) or (sham.Owner == TRIBE_ORANGE and orangeShamAngelDeath == 1)) then
+      if ((sham.Owner == TRIBE_BLUE and shamAngelDeathBools[0] == 1) or (sham.Owner == TRIBE_RED and shamAngelDeathBools[1] == 1) or (sham.Owner == TRIBE_YELLOW and shamAngelDeathBools[2] == 1) or (sham.Owner == TRIBE_GREEN and shamAngelDeathBools[3] == 1) or (sham.Owner == TRIBE_CYAN and shamAngelDeathBools[4] == 1) or (sham.Owner == TRIBE_PINK and shamAngelDeathBools[5] == 1) or (sham.Owner == TRIBE_BLACK and shamAngelDeathBools[6] == 1) or (sham.Owner == TRIBE_ORANGE and shamAngelDeathBools[7] == 1)) then
         sham.u.Pers.u.Owned.LastDamagedBy = TRIBE_NEUTRAL
       end
 
       if (is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) then
+        
         SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
 					me.MapWhoList:processList(function(p)
 						if (p.Type == T_EFFECT) then
-              if ((p.Model == M_EFFECT_INSECT_PLAGUE or p.Model == M_EFFECT_FLY_THINGUMMY) and p.Owner ~= sham.Owner) then
-                jumpOutCommand = Commands.new()
-                jumpOutCommand.CommandType = CMD_GET_OUT_OF_VEHICLE
-                
-                add_persons_command(sham, jumpOutCommand, 0)
-                if (sham.Owner == TRIBE_BLUE) then
-                  blueShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_RED) then
-                  redShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_YELLLOW) then
-                  yellowShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_GREEN) then
-                  greenShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_CYAN) then
-                  cyanShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_PINK) then
-                  pinkShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_BLACK) then
-                  blackShamSwarmHit = 1
-                elseif (sham.Owner == TRIBE_ORANGE) then
-                  orangeShamSwarmHit = 1
-                end                
+              if ((p.Model == M_EFFECT_INSECT_PLAGUE or p.Model == M_EFFECT_FLY_THINGUMMY) and p.Owner ~= sham.Owner) then  
+                shamSwarmHitBools[sham.Owner] = 1             
               end
 						end
 					return true
@@ -239,152 +161,51 @@ function OnTurn()
 				return true
 				end)
       end
+
+      if (sham.State == S_PERSON_DYING or sham.State == S_PERSON_DROWNING or sham.State == S_PERSON_ELECTROCUTED or sham.State == S_PERSON_SWAMP_DROWNING) then
+        table.remove(aliveShamans, i)
+      end
+    end
+
+    for i=0, 7 do
+      if (getShaman(i) == nil and shamAngelDeathBools[i] == 1) then
+        shamAngelDeathBools[i] = 0
+      end
     end
   end
 
   if (everyPow(1, 1)) then
-    for i, sham in pairs(aliveShamans) do
-      if (sham ~= nil) then        
-        if (sham.State == S_PERSON_DYING or sham.State == S_PERSON_SWAMP_DROWNING) then
-        --log_msg(TRIBE_NEUTRAL, "3")
-        --log_msg(TRIBE_NEUTRAL, "sham State "..sham.State)
-          SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
-            me.MapWhoList:processList(function(p)
-              --log_msg(TRIBE_NEUTRAL, "Type "..p.Type)
-              --log_msg(TRIBE_NEUTRAL, "Model "..p.Model)
-              --[[if (sham.Owner == TRIBE_BLUE) then
-                log_msg(TRIBE_NEUTRAL, "4")
-                blueShamSwampDeath = 1
-                log_msg(TRIBE_NEUTRAL, "5")
-              elseif (sham.Owner == TRIBE_RED) then
-                redShamSwampDeath = 1
-              elseif (sham.Owner == TRIBE_YELLOW) then
-                yellowShamSwampDeath = 1
-              elseif (sham.Owner == TRIBE_GREEN) then
-                greenShamSwampDeath = 1
-              elseif (sham.Owner == TRIBE_CYAN) then
-                cyanShamSwampDeath = 1
-              elseif (sham.Owner == TRIBE_PINK) then
-                pinkShamSwampDeath = 1
-              elseif (sham.Owner == TRIBE_BLACK) then
-                blackShamSwampDeath = 1
-              elseif (sham.Owner == TRIBE_ORANGE) then
-                orangeShamSwampDeath = 1
-              end--]]
-            return true
-            end)
-          return true
-          end)
-          
-        end
-      end
-    end
-
-    if (blueShamSwarmHit == 1) then
-      local blueSham = getShaman(TRIBE_BLUE)
-      if (blueSham ~= nil) then
-        if (is_thing_on_ground(blueSham) == 1 and blueSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(blueSham, S_PERSON_RUN_AWAY)
-          blueShamSwarmHit = 0
+    for i=0, 7 do
+      local sham = getShaman(i)
+      if(sham ~= nil) then
+        if (is_person_in_airship(sham) == 0 and is_person_in_boat(sham) == 0 and is_thing_on_ground(sham) == 1 and (sham.State == S_PERSON_GOTO_BASE_AND_WAIT or sham.State == S_PERSON_UNDER_COMMAND or sham.State == S_PERSON_WAIT_AT_POINT) and shamSwarmHitBools[i] == 1) then
+          set_person_new_state(sham, S_PERSON_RUN_AWAY)
+          shamSwarmHitBools[i] = 0
+        elseif ((is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) and shamSwarmHitBools[i] == 1) then
+          jumpOutCommand = Commands.new()
+          jumpOutCommand.CommandType = CMD_GET_OUT_OF_VEHICLE
+          add_persons_command(sham, jumpOutCommand, 0)
+          sham.Flags2 = sham.Flags2 ~ TF2_IN_AIRSHIP
         end
       else
-        blueShamSwarmHit = 0
-      end
-    end
-    if (redShamSwarmHit == 1) then
-      local redSham = getShaman(TRIBE_RED)
-      if (redSham ~= nil) then
-        if (is_thing_on_ground(redSham) == 1 and redSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(redSham, S_PERSON_RUN_AWAY)
-          redShamSwarmHit = 0
-        end
-      else
-        redShamSwarmHit = 0
-      end
-    end
-    if (yellowShamSwarmHit == 1) then
-      local yellowSham = getShaman(TRIBE_YELLOW)
-      if (yellowSham ~= nil) then
-        if (is_thing_on_ground(yellowSham) == 1 and yellowSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(yellowSham, S_PERSON_RUN_AWAY)
-          yellowShamSwarmHit = 0
-        end
-      else
-        yellowShamSwarmHit = 0
-      end
-    end
-    if (greenShamSwarmHit == 1) then
-      local greenSham = getShaman(TRIBE_GREEN)
-      if (greenSham ~= nil) then
-        if (is_thing_on_ground(greenSham) == 1 and greenSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(greenSham, S_PERSON_RUN_AWAY)
-          greenShamSwarmHit = 0
-        end
-      else
-        greenShamSwarmHit = 0
-      end
-    end
-    if (cyanShamSwarmHit == 1) then
-      local cyanSham = getShaman(TRIBE_CYAN)
-      if (cyanSham ~= nil) then
-        if (is_thing_on_ground(cyanSham) == 1 and cyanSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(cyanSham, S_PERSON_RUN_AWAY)
-          cyanShamSwarmHit = 0
-        end
-      else
-        cyanShamSwarmHit = 0
-      end
-    end
-    if (pinkShamSwarmHit == 1) then
-      local pinkSham = getShaman(TRIBE_PINK)
-      if (pinkSham ~= nil) then
-        if (is_thing_on_ground(pinkSham) == 1 and pinkSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(pinkSham, S_PERSON_RUN_AWAY)
-          pinkShamSwarmHit = 0
-        end
-      else
-        pinkShamSwarmHit = 0
-      end
-    end
-    if (blackShamSwarmHit == 1) then
-      local blackSham = getShaman(TRIBE_BLACK)
-      if (blackSham ~= nil) then
-        if (is_thing_on_ground(blackSham) == 1 and blackSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(blackSham, S_PERSON_RUN_AWAY)
-          blackShamSwarmHit = 0
-        end
-      else
-        blackShamSwarmHit = 0
-      end
-    end
-    if (orangeShamSwarmHit == 1) then
-      local orangeSham = getShaman(TRIBE_ORANGE)
-      if (orangeSham ~= nil) then
-        if (is_thing_on_ground(orangeSham) == 1 and orangeSham.State == S_PERSON_GOTO_BASE_AND_WAIT) then
-          set_person_new_state(orangeSham, S_PERSON_RUN_AWAY)
-          orangeShamSwarmHit = 0
-        end
-      else
-        orangeShamSwarmHit = 0
+        shamSwarmHitBools[i] = 0
       end
     end
   end
 
-  if (everyPow(2, 1)) then
-    for k, sham in pairs(deadShamans) do
-      log_msg(TRIBE_NEUTRAL, "DeadShamans")
-      if (sham ~= nil) then
-        if (sham.Model == M_INTERNAL_SOUL_CONVERT_2) then
-          log_msg(TRIBE_NEUTRAL, "DeadShamans2")
-          if (sham.u.SoulConvert.CurrModel == M_PERSON_MEDICINE_MAN) then
-            log_msg(TRIBE_NEUTRAL, "DeadShamans3")
-            if (sham.SubState == SS_SC2_SOUL_IN_LIMBO) then
-              log_msg(TRIBE_NEUTRAL, "Found dead soul, owner "..sham.Owner)
-              sham.u.SoulConvert.Count = 5
-              log_msg(TRIBE_NEUTRAL, "DeadShamans4")
-              table.remove(deadShamans, sham)
-              log_msg(TRIBE_NEUTRAL, "DeadShamans5")
+  for k, sham in pairs(deadShamans) do
+    if (sham ~= nil) then
+      if (sham.Model == M_INTERNAL_SOUL_CONVERT_2) then
+        if (sham.u.SoulConvert.CurrModel == M_PERSON_MEDICINE_MAN) then
+          if (sham.SubState == SS_SC2_SOUL_IN_LIMBO) then
+            sham.u.SoulConvert.Count = 57
+            deadShamansIntArray[sham.Owner] = deadShamansIntArray[sham.Owner] + 1
+
+            if (deadShamansIntArray[sham.Owner] == 3) then
+              deadShamansIntArray[sham.Owner] = 0
+              table.remove(deadShamans, k)
             end
+            
           end
         end
       end
@@ -394,6 +215,22 @@ function OnTurn()
   if (everyPow(1, 1)) then
     for i, veh in pairs(vehiclesTable) do
       veh:handleVehicle()
+    end
+
+    for i, swmp in pairs(swampyTable) do
+      swmp:handleSwampy()
+    end
+  end
+end
+
+function SetShamanSwampDeath(sham)
+  shamSwampDeathBools[sham.Owner] = 1
+end
+
+function DeleteVehicleFromList(t)
+  for i, veh in pairs(vehiclesTable) do
+    if (veh == t) then
+      table.remove(vehiclesTable, i)
     end
   end
 end
@@ -510,7 +347,6 @@ function OnCreateThing(t)
       DamageVehicle(t, vehicleDamageBlast)
     end
 
-
     if (t.Model == M_EFFECT_SIMPLE_BLAST) then
       if (tableLength(lightningBolts) > 0) then
         for i, light in pairs(lightningBolts) do
@@ -539,7 +375,23 @@ function OnCreateThing(t)
 
   if (t.Type == T_SHOT) then
     if (t.Model == M_SHOT_SUPER_WARRIOR) then
-      DamageVehicle(t, vehicleDamageFirewarriorBlast)
+      local fwDmg = vehicleDamageFirewarriorBlast
+
+      SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(t.Pos.D3), function(me)
+        me.MapWhoList:processList(function(p)
+          if (p.Type == T_BUILDING) then
+            if (p.Model == M_BUILDING_DRUM_TOWER) then
+              fwDmg = fwDmg * 2
+              return false
+            end
+          end
+
+        return true
+        end)
+      return true
+      end)
+
+      DamageVehicle(t, fwDmg)
     end
   end
   
@@ -551,36 +403,12 @@ function OnCreateThing(t)
 
   if (t.Type == T_INTERNAL) then
     if (t.Model == M_INTERNAL_SOUL_CONVERT_2) then
-      --log_msg(TRIBE_NEUTRAL, "CreateThing2")
       if (t.u.SoulConvert.CurrModel == M_PERSON_MEDICINE_MAN) then
-        --log_msg(TRIBE_NEUTRAL, "CreateThing3")
-        if (t.Owner == TRIBE_BLUE and blueShamSwampDeath == 1) then
-          log_msg(TRIBE_NEUTRAL, "CreateThing4")
-          table.insert(deadShamans, t)
-          log_msg(TRIBE_NEUTRAL, "CreateThing5")
-          blueShamSwampDeath = 0
-          log_msg(TRIBE_NEUTRAL, "CreateThing6")
-        elseif (t.Owner == TRIBE_RED and redShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          redShamSwampDeath = 0
-        elseif (t.Owner == TRIBE_YELLOW and yellowShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          yellowShamSwampDeath = 0
-        elseif (t.Owner == TRIBE_GREEN and greenShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          greenShamSwampDeath = 0
-        elseif (t.Owner == TRIBE_CYAN and cyanShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          cyan = 0
-        elseif (t.Owner == TRIBE_PINK and pinkShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          pinkShamSwampDeath = 0
-        elseif (t.Owner == TRIBE_BLACK and blackShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          blackShamSwampDeath = 0
-        elseif (t.Owner == TRIBE_ORANGE and orangeShamSwampDeath == 1) then
-          table.insert(deadShamans, t)
-          orangeShamSwampDeath = 0
+        for i=0, 7 do
+          if (t.Owner == i and shamSwampDeathBools[i] == 1) then
+            table.insert(deadShamans, t)
+            shamSwampDeathBools[i] = 0
+          end
         end
       end
     end
@@ -595,7 +423,21 @@ function HandleMaxShamanHealth(t)
 end
 
 function HandleSwamp(t)
+  local swampLoc = Coord3D.new()
+  swampLoc = t.Pos.D3
+  centre_coord3d_on_block(swampLoc)
+  local swampy = Swampy:new(nil, t.Owner, swampLoc)
+  table.insert(swampyTable, swampy)
+  
+  DestroyThing(t)
+end
 
+function DeleteSwampFromList(t)
+  for i, swmp in pairs(swampyTable) do
+    if (swmp == t) then
+      table.remove(swampyTable, i)
+    end
+  end
 end
 
 function HandleFlatten(t)
@@ -610,13 +452,12 @@ end
 
 function HandleGhostArmy(t)
   local createdGhosts = 0
-  queue_sound_event(nil, SND_EVENT_SP_GHOST, SEF_FIXED_VARS)
 
   SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
   me.MapWhoList:processList(function(p)
     if (p.Type == T_PERSON and createdGhosts == 0) then
       if (p.Model == M_PERSON_MEDICINE_MAN and p.Owner == t.Owner) then
-        local ghost = createThing(T_PERSON, M_PERSON_MEDICINE_MAN, t.Owner, t.Pos.D3, false, true)
+        createThing(T_PERSON, M_PERSON_MEDICINE_MAN, t.Owner, t.Pos.D3, false, true)
         createdGhosts = 1
         return false
       elseif (p.Model == M_PERSON_WARRIOR and p.Owner == t.Owner) then
@@ -643,7 +484,7 @@ function HandleGhostArmy(t)
         createThing(T_PERSON, M_PERSON_SPY, t.Owner, t.Pos.D3, false, true)
         createdGhosts = 1
         return false
-      elseif (p.Model == M_PERSON_BRAVe and p.Owner == t.Owner) then
+      elseif (p.Model == M_PERSON_BRAVE and p.Owner == t.Owner) then
         createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
         createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
         createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
@@ -662,10 +503,18 @@ function HandleGhostArmy(t)
         createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
         createdGhosts = 1
     end
+    
+    c3d = Coord3D.new()
 
-    createThing(T_EFFECT, M_EFFECT_SMOKE, TRIBE_NEUTRAL, t.Pos.D3, false, false)
+    for i = 0, 19 do
+      c3d.Xpos = world_coord_start_of_cell(t.Pos.D3.Xpos) + G_RANDOM(512);
+      c3d.Zpos = world_coord_start_of_cell(t.Pos.D3.Zpos) + G_RANDOM(512);
+      createThing(T_EFFECT, M_EFFECT_SMOKE, TRIBE_NEUTRAL, c3d, false, false)
+    end
 
     DestroyThing(t)
+
+    queue_sound_event(nil, SND_EVENT_SP_GHOST, SEF_FIXED_VARS)
 end
 
 function HandleBuffingSpells(t)
@@ -697,12 +546,13 @@ function HandleBuffingSpells(t)
   SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
   me.MapWhoList:processList(function(p)
     if (p.Type == T_PERSON) then
-      if (p.Model ~= M_PERSON_MEDICINE_MAN and p.Owner == t.Owner) then
-        unitsFound[unitsFoundCount] = p
-        unitsFoundCount = unitsFoundCount + 1
-        if (unitsFoundCount >= maxUnits) then
-          return false
+      if (p.Model ~= M_PERSON_MEDICINE_MAN and p.Owner == t.Owner and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
+        --For some reason it finds the first person twice???? So check if the person isnt double.
+        if (p ~= unitsFound[unitsFoundCount-1]) then
+          unitsFound[unitsFoundCount] = p
+          unitsFoundCount = unitsFoundCount + 1
         end
+        
       end
     end
   return true
@@ -731,6 +581,7 @@ function HandleBuffingSpells(t)
 
   local withBuffsSpecialIndex = 0
   local withSameBuffsSpecialIndex = 0
+
   for i=0, maxUnits-1 do
 	  if (tableLength(unitsFoundWithoutBuffs) >= i + 1) then
       unitsAffected[i] = unitsFoundWithoutBuffs[i]
@@ -768,7 +619,7 @@ function HandleBuffingSpells(t)
       if (spellModel == M_SPELL_INVISIBILITY) then
         pers.Flags2 = pers.Flags2 | TF2_THING_IS_AN_INVISIBLE_PERSON
         pers.u.Pers.u.Owned.InvisibleCount = _constants.InvisibleCount
-        
+       
         --If they are standing still make them move so the source code actually applies the invisibility effect...
         if (pers.State == S_PERSON_NONE or pers.State == S_PERSON_WAIT_AT_POINT) then
           command_person_go_to_coord2d(pers, pers.Pos.D2)

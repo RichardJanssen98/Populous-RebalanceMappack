@@ -38,6 +38,7 @@ function Vehicle:handleVehicle()
 		if (self.vehicleThing ~= nil) then
 			self.vehicleThing.u.Vehicle.Life = -1
 			self.vehicleThing = nil
+			DeleteVehicleFromList(self)
 		end
 		
 	end
