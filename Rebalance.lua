@@ -18,9 +18,9 @@ import(Module_System)
 import(Module_Sound)
 import(Module_Table)
 import(Module_Math)
+--import(Module_Spells)
 include("UtilRefs.lua")
 include("Vehicle.lua")
-include("Swampy.lua")
 
 sti = spells_type_info();
 _constants = constants();
@@ -29,23 +29,23 @@ initializedShamanHealth = 0
 sti[M_SPELL_INVISIBILITY].Cost = 75000;
 InvisNumPeopleAffected = 3;
 
+ignoreSwamp = 0
+
 aliveShamans = {}
 deadShamans = {}
 deadShamansIntArray = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
-
-swampyTable = {}
 
 vehiclesTable = {}
 vehicleHealth = 1000
 
 lightningBolts = {}
-vehicleDamageFirewarriorBlast = 50 --Firewarriors seem to be doing double damage? Perhaps per fireball
-vehicleDamageBlast = 100
+vehicleDamageFirewarriorBlast = 70 --Firewarriors seem to be doing double damage? Perhaps per fireball
+vehicleDamageBlast = 200
 vehicleDamageLightning = 1050
-vehicleDamageTornado = 25
-vehicleDamageFirestormExplosions = 100
-vehicleDamageVolcanoBigRockExplosions = 250
-vehicleDamageVolcanoSmallRockExplosions = 150
+vehicleDamageTornado = 50
+vehicleDamageFirestormExplosions = 200
+vehicleDamageVolcanoBigRockExplosions = 500
+vehicleDamageVolcanoSmallRockExplosions = 300
 
 shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 shamAngelDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
@@ -55,7 +55,7 @@ shamSwampDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 _constants.InvisNumPeopleAffected = 1;
 _constants.ShieldNumPeopleAffected = 1;
 _constants.BloodlustNumPeopleAffected = 1;
-_constants.SwampNumPeopleAffected = 10;
+_constants.SwampNumPeopleAffected = 1;
 
 BloodlustNumPeopleAffected = 3;
 
@@ -63,33 +63,71 @@ sti[M_SPELL_SHIELD].Cost = 75000;
 ShieldNumPeopleAffected = 3;
 
 sti[M_SPELL_GHOST_ARMY].Cost = 20000;
-sti[M_SPELL_EARTHQUAKE].Cost = 210000;
+sti[M_SPELL_EARTHQUAKE].Cost = 240000;
+sti[M_SPELL_EARTHQUAKE].WorldCoordRange = 3072;
 sti[M_SPELL_EROSION].Cost = 175000;
-sti[M_SPELL_FIRESTORM].OneOffMaximum = 1;
 
-sti[M_SPELL_ARMAGEDDON].CursorSpriteNum = sti[M_SPELL_HILL].CursorSpriteNum;
-sti[M_SPELL_ARMAGEDDON].DiscoveryDrawIdx = sti[M_SPELL_HILL].DiscoveryDrawIdx;
-sti[M_SPELL_ARMAGEDDON].AvailableSpriteIdx = sti[M_SPELL_HILL].AvailableSpriteIdx;
-sti[M_SPELL_ARMAGEDDON].NotAvailableSpriteIdx = sti[M_SPELL_HILL].NotAvailableSpriteIdx;
-sti[M_SPELL_ARMAGEDDON].ClickedSpriteIdx = sti[M_SPELL_HILL].ClickedSpriteIdx;
-sti[M_SPELL_ARMAGEDDON].ToolTipStrIdx = sti[M_SPELL_HILL].ToolTipStrIdx;
-sti[M_SPELL_ARMAGEDDON].ToolTipStrIdxLSME = sti[M_SPELL_HILL].ToolTipStrIdxLSME;
-sti[M_SPELL_ARMAGEDDON].GUIButtonId = sti[M_SPELL_ARMAGEDDON].GUIButtonId;
+sti[M_SPELL_BLOODLUST].CursorSpriteNum = sti[M_SPELL_HILL].CursorSpriteNum;
+sti[M_SPELL_BLOODLUST].DiscoveryDrawIdx = sti[M_SPELL_HILL].DiscoveryDrawIdx;
+sti[M_SPELL_BLOODLUST].AvailableSpriteIdx = sti[M_SPELL_HILL].AvailableSpriteIdx;
+sti[M_SPELL_BLOODLUST].NotAvailableSpriteIdx = sti[M_SPELL_HILL].NotAvailableSpriteIdx;
+sti[M_SPELL_BLOODLUST].ClickedSpriteIdx = sti[M_SPELL_HILL].ClickedSpriteIdx;
+sti[M_SPELL_BLOODLUST].ToolTipStrIdx = sti[M_SPELL_HILL].ToolTipStrIdx;
+sti[M_SPELL_BLOODLUST].ToolTipStrIdxLSME = sti[M_SPELL_HILL].ToolTipStrIdxLSME;
+sti[M_SPELL_BLOODLUST].GUIButtonId = sti[M_SPELL_BLOODLUST].GUIButtonId;
+sti[M_SPELL_BLOODLUST].CreateCastMsg = 1
 
 _gsi = gsi();
---_gsi.CurrLevelFlags = FlagSet(_gsi.CurrLevelFlags, GS_GUEST_SPELLS_CHARGE);
+--_gsi.Flags = FlagSet(_gsi.CurrLevelFlags, GS_GUEST_SPELLS_CHARGE);
 
 -- this might not work, in which case you might wanna check
---  for T_SPELL && M_SPELL_ARMAGEDDON inside OnCreateThing
-sti[M_SPELL_ARMAGEDDON].EffectModels[3] = M_SPELL_HILL; 
-_gsi.CurrLevelFlags = _gsi.CurrLevelFlags ~ LEVEL_FLAGS_NO_GUEST
-_gsi.CurrLevelFlags = _gsi.CurrLevelFlags | GS_GUEST_SPELLS_CHARGE
+--  for T_SPELL && M_SPELL_TELEPORT inside OnCreateThing
+sti[M_SPELL_BLOODLUST].EffectModels[0] = M_EFFECT_HILL;
+sti[M_SPELL_EROSION].EffectModels[0] = M_EFFECT_EROSION;
+sti[M_SPELL_EROSION].EffectModels[1] = M_EFFECT_VALLEY;
+sti[M_SPELL_BLOODLUST].OneOffMaximum = 2
+sti[M_SPELL_BLOODLUST].Cost = 210000;
+sti[M_SPELL_BLOODLUST].OptimalChargeSecs = 240
+sti[M_SPELL_BLOODLUST].WorldCoordRange = 4096
+_gsi.SpellsPresentOnLevel = _gsi.SpellsPresentOnLevel | (1 << M_SPELL_BLOODLUST)
+--set_special_guest_spell_model(M_SPELL_ARMAGEDDON)
+_gsi.Flags = _gsi.Flags | GS_GUEST_SPELLS_CHARGE
 
 function OnTurn()
   if (initializedShamanHealth == 0) then
+    ProcessGlobalTypeList(T_GENERAL, function(t)
+      local destroyMe = 0  
+
+      if (t.Type == T_GENERAL) then
+        if (t.Model == M_GENERAL_DISCOVERY) then
+          if (t.u.Discovery.DiscoveryModel == M_SPELL_BLOODLUST) then
+            SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(t.Pos.D3), function(me)
+					    me.MapWhoList:processList(function(p)
+                if (p.Model == M_SCENERY_HEAD) then
+                  destroyMe = 0
+                  return false
+                else
+                  destroyMe = 1
+                end
+              return true
+              end)
+            return true
+            end)
+          end
+        end
+      end
+      
+      if (destroyMe == 1) then
+        DestroyThing(t)
+      end
+    return true
+    end)
+
+    
+    
     for i=0, 7 do
-      --_gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable | (1 << M_SPELL_ARMAGEDDON)
-      --_gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging ~ (1 << M_SPELL_ARMAGEDDON-1)
+      _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
+      _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
       
       local shaman = getShaman(i)
 
@@ -98,10 +136,6 @@ function OnTurn()
       end
     end
     initializedShamanHealth = 1
-    sti[M_SPELL_ARMAGEDDON].OneOffMaximum = 3
-    sti[M_SPELL_ARMAGEDDON].Cost = 200000;
-    sti[M_SPELL_ARMAGEDDON].OptimalChargeSecs = 240
-    sti[M_SPELL_ARMAGEDDON].WorldCoordRange = 4096
 
     --Put any vehicles into the vehicles list just in case the map has some pre made vehicles
     ProcessGlobalTypeList(T_VEHICLE, function(t)
@@ -143,35 +177,37 @@ function OnTurn()
 
   if (everyPow(1, 1)) then
     for i, sham in pairs(aliveShamans) do
-      if ((sham.Owner == TRIBE_BLUE and shamAngelDeathBools[0] == 1) or (sham.Owner == TRIBE_RED and shamAngelDeathBools[1] == 1) or (sham.Owner == TRIBE_YELLOW and shamAngelDeathBools[2] == 1) or (sham.Owner == TRIBE_GREEN and shamAngelDeathBools[3] == 1) or (sham.Owner == TRIBE_CYAN and shamAngelDeathBools[4] == 1) or (sham.Owner == TRIBE_PINK and shamAngelDeathBools[5] == 1) or (sham.Owner == TRIBE_BLACK and shamAngelDeathBools[6] == 1) or (sham.Owner == TRIBE_ORANGE and shamAngelDeathBools[7] == 1)) then
-        sham.u.Pers.u.Owned.LastDamagedBy = TRIBE_NEUTRAL
-      end
+      if (sham ~= nil) then
+        if ((sham.Owner == TRIBE_BLUE and shamAngelDeathBools[0] == 1) or (sham.Owner == TRIBE_RED and shamAngelDeathBools[1] == 1) or (sham.Owner == TRIBE_YELLOW and shamAngelDeathBools[2] == 1) or (sham.Owner == TRIBE_GREEN and shamAngelDeathBools[3] == 1) or (sham.Owner == TRIBE_CYAN and shamAngelDeathBools[4] == 1) or (sham.Owner == TRIBE_PINK and shamAngelDeathBools[5] == 1) or (sham.Owner == TRIBE_BLACK and shamAngelDeathBools[6] == 1) or (sham.Owner == TRIBE_ORANGE and shamAngelDeathBools[7] == 1)) then
+          sham.u.Pers.u.Owned.LastDamagedBy = TRIBE_NEUTRAL
+        end
 
-      if (is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) then
+        if (is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) then
         
-        SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
-					me.MapWhoList:processList(function(p)
-						if (p.Type == T_EFFECT) then
-              if ((p.Model == M_EFFECT_INSECT_PLAGUE or p.Model == M_EFFECT_FLY_THINGUMMY) and p.Owner ~= sham.Owner) then  
-                shamSwarmHitBools[sham.Owner] = 1             
-              end
-						end
-					return true
-					end)
-				return true
-				end)
+          SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
+					  me.MapWhoList:processList(function(p)
+						  if (p.Type == T_EFFECT) then
+                if ((p.Model == M_EFFECT_INSECT_PLAGUE or p.Model == M_EFFECT_FLY_THINGUMMY) and p.Owner ~= sham.Owner) then  
+                  shamSwarmHitBools[sham.Owner] = 1             
+                end
+						  end
+					  return true
+					  end)
+				  return true
+				  end)
+        end
+
+        if (sham.State == S_PERSON_DYING or sham.State == S_PERSON_DROWNING or sham.State == S_PERSON_ELECTROCUTED or sham.State == S_PERSON_SWAMP_DROWNING) then
+          table.remove(aliveShamans, i)
+        end
       end
 
-      if (sham.State == S_PERSON_DYING or sham.State == S_PERSON_DROWNING or sham.State == S_PERSON_ELECTROCUTED or sham.State == S_PERSON_SWAMP_DROWNING) then
-        table.remove(aliveShamans, i)
+      for i=0, 7 do
+        if (getShaman(i) == nil and shamAngelDeathBools[i] == 1) then
+          shamAngelDeathBools[i] = 0
+        end
       end
-    end
-
-    for i=0, 7 do
-      if (getShaman(i) == nil and shamAngelDeathBools[i] == 1) then
-        shamAngelDeathBools[i] = 0
-      end
-    end
+    end 
   end
 
   if (everyPow(1, 1)) then
@@ -215,10 +251,6 @@ function OnTurn()
   if (everyPow(1, 1)) then
     for i, veh in pairs(vehiclesTable) do
       veh:handleVehicle()
-    end
-
-    for i, swmp in pairs(swampyTable) do
-      swmp:handleSwampy()
     end
   end
 end
@@ -309,6 +341,17 @@ function DamageVehicle(t, dmg)
   end
 end
 
+function OnSwampDrown(t_swamp, t_victim)
+  if (t_swamp ~= nil and t_victim ~= nil) then
+    if (t_swamp.Owner ~= t_victim.Owner) then
+      if (t_victim.Model == M_PERSON_MEDICINE_MAN) then
+        shamSwampDeathBools[t_victim.Owner] = 1
+      end
+    end
+  end
+  
+end
+
 function OnCreateThing(t)
   if (t.Type == T_VEHICLE) then
     local maxHealth = math.floor(vehicleHealth * 0.75) + G_RANDOM(math.floor(vehicleHealth * 0.25))
@@ -318,11 +361,17 @@ function OnCreateThing(t)
 
   if (t.Type == T_SPELL) then
     local shamanOwner = getShaman(t.Owner)
-    if (is_person_in_airship(shamanOwner) == 1) then
-      t.Model = M_SPELL_NONE
-    end
-    if (is_person_in_boat(shamanOwner) == 1 and shamanOwner.Pos.D3.Ypos >= 49) then
-      t.Model = M_SPELL_NONE
+    if (shamanOwner ~= nil) then
+      if (is_person_in_airship(shamanOwner) == 1) then
+        t.Model = M_SPELL_NONE
+      end
+      if (is_person_in_boat(shamanOwner) == 1) then
+        if (t.Model == M_SPELL_BLAST or t.Model == M_SPELL_INSECT_PLAGUE) then
+          --Just cast pls
+        else
+          t.Model = M_SPELL_NONE
+        end
+      end
     end
 
     if (t.Model == M_SPELL_LIGHTNING_BOLT) then
@@ -423,20 +472,38 @@ function HandleMaxShamanHealth(t)
 end
 
 function HandleSwamp(t)
-  local swampLoc = Coord3D.new()
-  swampLoc = t.Pos.D3
-  centre_coord3d_on_block(swampLoc)
-  local swampy = Swampy:new(nil, t.Owner, swampLoc)
-  table.insert(swampyTable, swampy)
-  
-  DestroyThing(t)
-end
+  if (ignoreSwamp == 0) then
+    ignoreSwamp = 9
 
-function DeleteSwampFromList(t)
-  for i, swmp in pairs(swampyTable) do
-    if (swmp == t) then
-      table.remove(swampyTable, i)
-    end
+    for i=1, 9 do
+			placeLocation = Coord3D.new()
+			placeLocation = t.Pos.D3
+
+			if (i == 2) then
+				placeLocation.Zpos = placeLocation.Zpos - 512
+			elseif (i == 3) then
+				placeLocation.Xpos = placeLocation.Xpos + 512
+			elseif (i == 4) then
+				placeLocation.Zpos = placeLocation.Zpos + 512
+			elseif (i == 5) then
+				placeLocation.Zpos = placeLocation.Zpos + 512
+			elseif (i == 6) then
+				placeLocation.Xpos = placeLocation.Xpos - 512
+			elseif (i == 7) then
+				placeLocation.Xpos = placeLocation.Xpos - 512
+			elseif (i == 8) then
+				placeLocation.Zpos = placeLocation.Zpos - 512
+			elseif (i == 9) then
+				placeLocation.Zpos = placeLocation.Zpos - 512
+			end
+
+			ensure_point_on_ground(placeLocation)
+			createThing(T_EFFECT, M_EFFECT_SWAMP, t.Owner, placeLocation, false, false)
+	  end
+
+    DestroyThing(t)
+  else
+    ignoreSwamp = ignoreSwamp - 1
   end
 end
 
@@ -546,7 +613,7 @@ function HandleBuffingSpells(t)
   SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
   me.MapWhoList:processList(function(p)
     if (p.Type == T_PERSON) then
-      if (p.Model ~= M_PERSON_MEDICINE_MAN and p.Owner == t.Owner and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
+      if (p.Model ~= M_PERSON_MEDICINE_MAN and (p.Owner == t.Owner or are_players_allied(p.Owner, t.Owner) >= 1) and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
         --For some reason it finds the first person twice???? So check if the person isnt double.
         if (p ~= unitsFound[unitsFoundCount-1]) then
           unitsFound[unitsFoundCount] = p
