@@ -27,7 +27,7 @@ _constants = constants();
 initializedShamanHealth = 0
 
 sti[M_SPELL_INVISIBILITY].Cost = 75000;
-InvisNumPeopleAffected = 3;
+InvisNumPeopleAffected = 4;
 
 ignoreSwamp = 0
 
@@ -60,7 +60,7 @@ _constants.SwampNumPeopleAffected = 1;
 BloodlustNumPeopleAffected = 3;
 
 sti[M_SPELL_SHIELD].Cost = 75000;
-ShieldNumPeopleAffected = 3;
+ShieldNumPeopleAffected = 4;
 
 sti[M_SPELL_GHOST_ARMY].Cost = 20000;
 sti[M_SPELL_EARTHQUAKE].Cost = 240000;
@@ -86,7 +86,7 @@ sti[M_SPELL_BLOODLUST].EffectModels[0] = M_EFFECT_HILL;
 sti[M_SPELL_EROSION].EffectModels[0] = M_EFFECT_EROSION;
 sti[M_SPELL_EROSION].EffectModels[1] = M_EFFECT_VALLEY;
 sti[M_SPELL_BLOODLUST].OneOffMaximum = 2
-sti[M_SPELL_BLOODLUST].Cost = 210000;
+sti[M_SPELL_BLOODLUST].Cost = 190000;
 sti[M_SPELL_BLOODLUST].OptimalChargeSecs = 240
 sti[M_SPELL_BLOODLUST].WorldCoordRange = 4096
 _gsi.SpellsPresentOnLevel = _gsi.SpellsPresentOnLevel | (1 << M_SPELL_BLOODLUST)

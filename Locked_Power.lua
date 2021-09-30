@@ -69,9 +69,6 @@ for i,k in ipairs(ReincPos) do
         end
 
         if (i == 3 or i == 6) then
-          EnableSpell(t.Owner, M_SPELL_WHIRLWIND)
-          DisableSpellCharging(t.Owner, M_SPELL_WHIRLWIND)
-          
           EnableSpell(t.Owner, M_SPELL_INVISIBILITY)
           DisableSpellCharging(t.Owner, M_SPELL_INVISIBILITY)
 

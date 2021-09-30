@@ -100,6 +100,8 @@ for i,k in ipairs(ReincPos) do
           DisableSpellCharging(t.Owner, M_SPELL_ANGEL_OF_DEATH)
           EnableSpell(t.Owner, M_SPELL_LIGHTNING_BOLT)
           DisableSpellCharging(t.Owner, M_SPELL_LIGHTNING_BOLT)
+          EnableSpell(t.Owner, M_SPELL_INSECT_PLAGUE)
+          DisableSpellCharging(t.Owner, M_SPELL_INSECT_PLAGUE)
         elseif (i == 2 or i == 6) then
           EnableBuilding(t.Owner, M_BUILDING_WARRIOR_TRAIN)
           EnableBuilding(t.Owner, M_BUILDING_AIRSHIP_HUT_1)
@@ -115,6 +117,8 @@ for i,k in ipairs(ReincPos) do
         elseif (i == 3 or i == 7) then
           EnableBuilding(t.Owner, M_BUILDING_TEMPLE)
 
+          EnableSpell(t.Owner, M_SPELL_LIGHTNING_BOLT)
+          DisableSpellCharging(t.Owner, M_SPELL_LIGHTNING_BOLT)
           EnableSpell(t.Owner, M_SPELL_EROSION)
           DisableSpellCharging(t.Owner, M_SPELL_EROSION)
           EnableSpell(t.Owner, M_SPELL_HYPNOTISM)
@@ -169,17 +173,17 @@ function OnTrigger(trigger)
 	if (trigger.Pos.D2.Xpos == -3072 and trigger.Pos.D2.Zpos == 4096) then
     local cd2d = Coord2D.new()
     local cd3d = Coord3D.new()
-    map_xz_to_world_coord2d(252, 16, cd2d)
+    map_xz_to_world_coord2d(154, 142, cd2d)
     coord2D_to_coord3D(cd2d, cd3d)
 
     createThing(T_EFFECT, M_EFFECT_ANGEL_OF_DEATH, TRIBE_NEUTRAL, cd3d, false, false)
     
-    map_xz_to_world_coord2d(226, 16, cd2d)
+    map_xz_to_world_coord2d(154, 142, cd2d)
     coord2D_to_coord3D(cd2d, cd3d)
 
     createThing(T_EFFECT, M_EFFECT_ANGEL_OF_DEATH, TRIBE_NEUTRAL, cd3d, false, false)
 
-    map_xz_to_world_coord2d(6, 8, cd2d)
+    map_xz_to_world_coord2d(154, 142, cd2d)
     coord2D_to_coord3D(cd2d, cd3d)
 
     createThing(T_EFFECT, M_EFFECT_ANGEL_OF_DEATH, TRIBE_NEUTRAL, cd3d, false, false)
