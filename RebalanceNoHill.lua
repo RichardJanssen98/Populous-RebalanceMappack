@@ -39,13 +39,13 @@ vehiclesTable = {}
 vehicleHealth = 1000
 
 lightningBolts = {}
-vehicleDamageFirewarriorBlast = 70 --Firewarriors seem to be doing double damage? Perhaps per fireball
-vehicleDamageBlast = 200
+vehicleDamageFirewarriorBlast = 50 --Firewarriors seem to be doing double damage? Perhaps per fireball
+vehicleDamageBlast = 100
 vehicleDamageLightning = 1050
 vehicleDamageTornado = 50
-vehicleDamageFirestormExplosions = 200
+vehicleDamageFirestormExplosions = 100
 vehicleDamageVolcanoBigRockExplosions = 500
-vehicleDamageVolcanoSmallRockExplosions = 300
+vehicleDamageVolcanoSmallRockExplosions = 250
 
 shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 shamAngelDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
@@ -176,27 +176,26 @@ function OnTurn()
   if (everyPow(1, 1)) then
     for i, sham in pairs(aliveShamans) do
       if (sham ~= nil) then
-        if ((sham.Owner == TRIBE_BLUE and shamAngelDeathBools[0] == 1) or (sham.Owner == TRIBE_RED and shamAngelDeathBools[1] == 1) or (sham.Owner == TRIBE_YELLOW and shamAngelDeathBools[2] == 1) or (sham.Owner == TRIBE_GREEN and shamAngelDeathBools[3] == 1) or (sham.Owner == TRIBE_CYAN and shamAngelDeathBools[4] == 1) or (sham.Owner == TRIBE_PINK and shamAngelDeathBools[5] == 1) or (sham.Owner == TRIBE_BLACK and shamAngelDeathBools[6] == 1) or (sham.Owner == TRIBE_ORANGE and shamAngelDeathBools[7] == 1)) then
-          sham.u.Pers.u.Owned.LastDamagedBy = TRIBE_NEUTRAL
-        end
-
-        if (is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) then
-        
-          SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
-					  me.MapWhoList:processList(function(p)
-						  if (p.Type == T_EFFECT) then
-                if ((p.Model == M_EFFECT_INSECT_PLAGUE or p.Model == M_EFFECT_FLY_THINGUMMY) and p.Owner ~= sham.Owner) then  
-                  shamSwarmHitBools[sham.Owner] = 1             
-                end
-						  end
-					  return true
-					  end)
-				  return true
-				  end)
-        end
-
         if (sham.State == S_PERSON_DYING or sham.State == S_PERSON_DROWNING or sham.State == S_PERSON_ELECTROCUTED or sham.State == S_PERSON_SWAMP_DROWNING) then
           table.remove(aliveShamans, i)
+        else
+          if ((sham.Owner == TRIBE_BLUE and shamAngelDeathBools[0] == 1) or (sham.Owner == TRIBE_RED and shamAngelDeathBools[1] == 1) or (sham.Owner == TRIBE_YELLOW and shamAngelDeathBools[2] == 1) or (sham.Owner == TRIBE_GREEN and shamAngelDeathBools[3] == 1) or (sham.Owner == TRIBE_CYAN and shamAngelDeathBools[4] == 1) or (sham.Owner == TRIBE_PINK and shamAngelDeathBools[5] == 1) or (sham.Owner == TRIBE_BLACK and shamAngelDeathBools[6] == 1) or (sham.Owner == TRIBE_ORANGE and shamAngelDeathBools[7] == 1)) then
+            sham.u.Pers.u.Owned.LastDamagedBy = TRIBE_NEUTRAL
+          end
+
+          if (is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) then
+            SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
+					    me.MapWhoList:processList(function(p)
+						    if (p.Type == T_EFFECT) then
+                  if ((p.Model == M_EFFECT_INSECT_PLAGUE or p.Model == M_EFFECT_FLY_THINGUMMY) and p.Owner ~= sham.Owner) then  
+                    shamSwarmHitBools[sham.Owner] = 1             
+                  end
+						    end
+					    return true
+					    end)
+				    return true
+				    end)
+          end
         end
       end
 
