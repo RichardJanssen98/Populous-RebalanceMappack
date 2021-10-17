@@ -139,6 +139,8 @@ for i,k in ipairs(ReincPos) do
           DisableSpellCharging(t.Owner, M_SPELL_GHOST_ARMY)
           EnableSpell(t.Owner, M_SPELL_SWAMP)
           DisableSpellCharging(t.Owner, M_SPELL_SWAMP)
+          EnableSpell(t.Owner, M_SPELL_INSECT_PLAGUE)
+          DisableSpellCharging(t.Owner, M_SPELL_INSECT_PLAGUE)
         end
 
 
@@ -173,17 +175,17 @@ function OnTrigger(trigger)
 	if (trigger.Pos.D2.Xpos == -3072 and trigger.Pos.D2.Zpos == 4096) then
     local cd2d = Coord2D.new()
     local cd3d = Coord3D.new()
-    map_xz_to_world_coord2d(154, 142, cd2d)
+    map_xz_to_world_coord2d(220, 16, cd2d)
     coord2D_to_coord3D(cd2d, cd3d)
 
     createThing(T_EFFECT, M_EFFECT_ANGEL_OF_DEATH, TRIBE_NEUTRAL, cd3d, false, false)
     
-    map_xz_to_world_coord2d(154, 142, cd2d)
+    map_xz_to_world_coord2d(252, 16, cd2d)
     coord2D_to_coord3D(cd2d, cd3d)
 
     createThing(T_EFFECT, M_EFFECT_ANGEL_OF_DEATH, TRIBE_NEUTRAL, cd3d, false, false)
 
-    map_xz_to_world_coord2d(154, 142, cd2d)
+    map_xz_to_world_coord2d(242, 6, cd2d)
     coord2D_to_coord3D(cd2d, cd3d)
 
     createThing(T_EFFECT, M_EFFECT_ANGEL_OF_DEATH, TRIBE_NEUTRAL, cd3d, false, false)

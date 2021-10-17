@@ -18,7 +18,6 @@ import(Module_System)
 import(Module_Sound)
 import(Module_Table)
 import(Module_Math)
---import(Module_Spells)
 include("UtilRefs.lua")
 include("Vehicle.lua")
 
@@ -86,7 +85,7 @@ sti[M_SPELL_BLOODLUST].EffectModels[0] = M_EFFECT_HILL;
 sti[M_SPELL_EROSION].EffectModels[0] = M_EFFECT_EROSION;
 sti[M_SPELL_EROSION].EffectModels[1] = M_EFFECT_VALLEY;
 sti[M_SPELL_BLOODLUST].OneOffMaximum = 2
-sti[M_SPELL_BLOODLUST].Cost = 190000;
+sti[M_SPELL_BLOODLUST].Cost = 150000;
 sti[M_SPELL_BLOODLUST].OptimalChargeSecs = 240
 sti[M_SPELL_BLOODLUST].WorldCoordRange = 4096
 _gsi.SpellsPresentOnLevel = _gsi.SpellsPresentOnLevel | (1 << M_SPELL_BLOODLUST)
@@ -375,6 +374,13 @@ function OnCreateThing(t)
       local c2d = Coord2D.new()
       coord3D_to_coord2D(t.u.Spell.TargetCoord, c2d)
       table.insert(lightningBolts, c2d)
+
+      --No S-Clicks credit goes to Kosjak
+      if (not t.u.Spell.TargetThingIdx:isNull()) then
+        if (t.u.Spell.TargetThingIdx:get().Model == M_PERSON_MEDICINE_MAN) then
+          t.u.Spell.TargetThingIdx:set(0)
+        end
+      end
     end
   end
 
@@ -505,7 +511,7 @@ function HandleSwamp(t)
 end
 
 function HandleFlatten(t)
-  SearchMapCells(CIRCULAR, 0, 0, 2, world_coord3d_to_map_idx(t.Pos.D3), function(me)
+  SearchMapCells(CIRCULAR, 0, 0, 4, world_coord3d_to_map_idx(t.Pos.D3), function(me)
     if (me.Flags & (1<<26) >= 1) then
       me.Flags = me.Flags ~ (1<<26)
       me.Cliff = 40
@@ -607,16 +613,12 @@ function HandleBuffingSpells(t)
     maxUnits = BloodlustNumPeopleAffected;
   end
 
-  SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
+  SearchMapCells(SQUARE, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
   me.MapWhoList:processList(function(p)
     if (p.Type == T_PERSON) then
       if (p.Model ~= M_PERSON_MEDICINE_MAN and (p.Owner == t.Owner or are_players_allied(p.Owner, t.Owner) >= 1) and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
-        --For some reason it finds the first person twice???? So check if the person isnt double.
-        if (p ~= unitsFound[unitsFoundCount-1]) then
-          unitsFound[unitsFoundCount] = p
-          unitsFoundCount = unitsFoundCount + 1
-        end
-        
+        unitsFound[unitsFoundCount] = p
+        unitsFoundCount = unitsFoundCount + 1
       end
     end
   return true

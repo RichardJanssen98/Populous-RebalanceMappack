@@ -149,4 +149,48 @@ function OnTurn()
       pinkShaman = nil
     end
   end
+
+  --Kill Imprisoned shaman if last unit, credits go to Unknown_TAS
+  if gsi().Counts.GameTurn % 24 == 0 then
+		
+		if gsi().Counts.GameTurn > 240 then
+
+			local count = 0
+
+			for i = 0, 7 do
+
+				local tribe = gsi().Players[i].NumPeople
+
+				if tribe == 1 then
+
+					local shaman = getShaman(count)
+					if shaman ~= nil then
+
+						if shaman.State == S_PERSON_SHAMAN_IN_PRISON then
+
+							local mp = MapPosXZ.new()
+							mp.Pos = world_coord2d_to_map_idx(shaman.Pos.D2)
+							KILL_TEAM_IN_AREA(mp.XZ.X, mp.XZ.Z, 0)
+							count = count + 1
+
+						else
+
+							count = count + 1
+
+						end
+
+					else
+
+						count = count + 1
+
+					end
+
+				else
+
+					count = count + 1
+
+				end
+			end
+		end
+	end
 end
