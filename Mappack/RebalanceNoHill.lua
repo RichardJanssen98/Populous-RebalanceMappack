@@ -111,7 +111,7 @@ function OnTurn()
               return true
               end)
             return true
-            end)
+            end)     
           end
         end
       end
@@ -122,11 +122,9 @@ function OnTurn()
     return true
     end)
 
-    
-    
     for i=0, 7 do
-      _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
-      _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
+      --_gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
+      --_gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
       
       local shaman = getShaman(i)
 
@@ -163,18 +161,18 @@ function OnTurn()
       end
     end
 
+    shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+  end
+
+  if (everyPow(1, 1)) then
     for i, sham in pairs(aliveShamans) do
       if (sham ~= nil) then
         if (sham.State == S_PERSON_AOD2_VICTIM) then
           shamAngelDeathBools[sham.Owner] = 1
         end
       end
-
-      shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
     end
-  end
 
-  if (everyPow(1, 1)) then
     for i, sham in pairs(aliveShamans) do
       if (sham ~= nil) then
         if (sham.State == S_PERSON_DYING or sham.State == S_PERSON_DROWNING or sham.State == S_PERSON_ELECTROCUTED or sham.State == S_PERSON_SWAMP_DROWNING) then
@@ -364,7 +362,7 @@ function OnCreateThing(t)
         t.Model = M_SPELL_NONE
       end
       if (is_person_in_boat(shamanOwner) == 1) then
-        if (t.Model == M_SPELL_BLAST or t.Model == M_SPELL_INSECT_PLAGUE) then
+        if (t.Model == M_SPELL_INSECT_PLAGUE) then
           --Just cast pls
         else
           t.Model = M_SPELL_NONE

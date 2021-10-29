@@ -1,0 +1,306 @@
+PACKNAME: Revival: Regenerated Worlds
+PACKVERSION: 1.01
+PACKCREATOR: Ralimurr, JimmyHunter1000, Sky-, Sub_Zero, Lovenji, Keith52
+
+LEVEL: 0
+NAME: Serpentine Madness
+DAT: levl2001.dat
+HDR: levl2001.hdr
+CREATOR: Ralimurr
+
+LEVEL: 1
+NAME: Snowy Fortresses
+DAT: levl2002.dat
+HDR: levl2002.hdr
+CREATOR: JimmyHunter1000, Ralimurr
+
+LEVEL: 2
+NAME: Twin Moons
+DAT: levl2003.dat
+HDR: levl2003.hdr
+CREATOR: Sky-, Ralimurr
+
+LEVEL: 3
+NAME: Advanced Chaos
+DAT: levl2004.dat
+HDR: levl2004.hdr
+CREATOR: Ralimurr
+
+LEVEL: 4
+NAME: Eye of the Storm
+DAT: levl2005.dat
+HDR: levl2005.hdr
+CREATOR: JimmyHunter1000, Ralimurr, Bullfrog
+
+LEVEL: 5
+NAME: Locked Power
+DAT: levl2006.dat
+HDR: levl2006.hdr
+CREATOR: Sky-, Ralimurr
+
+LEVEL: 6
+NAME: Lords of War
+DAT: levl2007.dat
+HDR: levl2007.hdr
+CREATOR: Ralimurr
+
+LEVEL: 7
+NAME: Fallen Angels
+DAT: levl2008.dat
+HDR: levl2008.hdr
+CREATOR: Ralimurr
+
+LEVEL: 8
+NAME: Conjoined Twins
+DAT: levl2009.dat
+HDR: levl2009.hdr
+CREATOR: Ralimurr
+
+LEVEL: 9
+NAME: Bad Moon
+DAT: levl2010.dat
+HDR: levl2010.hdr
+CREATOR: Ralimurr
+
+EXTRASRC: constant.dat
+EXTRADST: levels\constant.dat
+
+EXTRASRC: al0-1.dat
+EXTRADST: data\al0-1.dat
+
+EXTRASRC: bigf0-1.dat
+EXTRADST: data\bigf0-1.dat
+
+EXTRASRC: cliff0-1.dat
+EXTRADST: data\cliff0-1.dat
+
+EXTRASRC: fade0-1.dat
+EXTRADST: data\fade0-1.dat
+
+EXTRASRC: ghost0-1.dat
+EXTRADST: data\ghost0-1.dat
+
+EXTRASRC: pal0-1.dat
+EXTRADST: data\pal0-1.dat
+
+EXTRASRC: sky0-1.dat
+EXTRADST: data\sky0-1.dat
+
+EXTRASRC: al0-5.dat
+EXTRADST: data\al0-5.dat
+
+EXTRASRC: bigf0-5.dat
+EXTRADST: data\bigf0-5.dat
+
+EXTRASRC: cliff0-5.dat
+EXTRADST: data\cliff0-5.dat
+
+EXTRASRC: fade0-5.dat
+EXTRADST: data\fade0-5.dat
+
+EXTRASRC: ghost0-5.dat
+EXTRADST: data\ghost0-5.dat
+
+EXTRASRC: pal0-5.dat
+EXTRADST: data\pal0-5.dat
+
+EXTRASRC: sky0-5.dat
+EXTRADST: data\sky0-5.dat
+
+EXTRASRC: al0-a.dat
+EXTRADST: data\al0-a.dat
+
+EXTRASRC: bigf0-a.dat
+EXTRADST: data\bigf0-a.dat
+
+EXTRASRC: cliff0-a.dat
+EXTRADST: data\cliff0-a.dat
+
+EXTRASRC: fade0-a.dat
+EXTRADST: data\fade0-a.dat
+
+EXTRASRC: ghost0-a.dat
+EXTRADST: data\ghost0-a.dat
+
+EXTRASRC: pal0-a.dat
+EXTRADST: data\pal0-a.dat
+
+EXTRASRC: sky0-a.dat
+EXTRADST: data\sky0-a.dat
+
+EXTRASRC: al0-h.dat
+EXTRADST: data\al0-h.dat
+
+EXTRASRC: bigf0-h.dat
+EXTRADST: data\bigf0-h.dat
+
+EXTRASRC: cliff0-h.dat
+EXTRADST: data\cliff0-h.dat
+
+EXTRASRC: fade0-h.dat
+EXTRADST: data\fade0-h.dat
+
+EXTRASRC: ghost0-h.dat
+EXTRADST: data\ghost0-h.dat
+
+EXTRASRC: pal0-h.dat
+EXTRADST: data\pal0-h.dat
+
+EXTRASRC: sky0-h.dat
+EXTRADST: data\sky0-h.dat
+
+EXTRASRC: BL320-h.dat
+EXTRADST: data\BL320-h.dat
+
+EXTRASRC: al0-k.dat
+EXTRADST: data\al0-k.dat
+
+EXTRASRC: bigf0-k.dat
+EXTRADST: data\bigf0-k.dat
+
+EXTRASRC: cliff0-k.dat
+EXTRADST: data\cliff0-k.dat
+
+EXTRASRC: fade0-k.dat
+EXTRADST: data\fade0-k.dat
+
+EXTRASRC: ghost0-k.dat
+EXTRADST: data\ghost0-k.dat
+
+EXTRASRC: pal0-k.dat
+EXTRADST: data\pal0-k.dat
+
+EXTRASRC: sky0-k.dat
+EXTRADST: data\sky0-k.dat
+
+EXTRASRC: al0-s.dat
+EXTRADST: data\al0-s.dat
+
+EXTRASRC: bigf0-s.dat
+EXTRADST: data\bigf0-s.dat
+
+EXTRASRC: cliff0-s.dat
+EXTRADST: data\cliff0-s.dat
+
+EXTRASRC: fade0-s.dat
+EXTRADST: data\fade0-s.dat
+
+EXTRASRC: ghost0-s.dat
+EXTRADST: data\ghost0-s.dat
+
+EXTRASRC: pal0-s.dat
+EXTRADST: data\pal0-s.dat
+
+EXTRASRC: sky0-s.dat
+EXTRADST: data\sky0-s.dat
+
+EXTRASRC: disp0-s.dat
+EXTRADST: data\disp0-s.dat
+
+EXTRASRC: al0-u.dat
+EXTRADST: data\al0-u.dat
+
+EXTRASRC: bigf0-u.dat
+EXTRADST: data\bigf0-u.dat
+
+EXTRASRC: cliff0-u.dat
+EXTRADST: data\cliff0-u.dat
+
+EXTRASRC: fade0-u.dat
+EXTRADST: data\fade0-u.dat
+
+EXTRASRC: ghost0-u.dat
+EXTRADST: data\ghost0-u.dat
+
+EXTRASRC: pal0-u.dat
+EXTRADST: data\pal0-u.dat
+
+EXTRASRC: sky0-u.dat
+EXTRADST: data\sky0-u.dat
+
+EXTRASRC: disp0-u.dat
+EXTRADST: data\disp0-u.dat
+
+EXTRASRC: al0-y.dat
+EXTRADST: data\al0-y.dat
+
+EXTRASRC: bigf0-y.dat
+EXTRADST: data\bigf0-y.dat
+
+EXTRASRC: cliff0-y.dat
+EXTRADST: data\cliff0-y.dat
+
+EXTRASRC: fade0-y.dat
+EXTRADST: data\fade0-y.dat
+
+EXTRASRC: ghost0-y.dat
+EXTRADST: data\ghost0-y.dat
+
+EXTRASRC: pal0-y.dat
+EXTRADST: data\pal0-y.dat
+
+EXTRASRC: sky0-y.dat
+EXTRADST: data\sky0-y.dat
+
+EXTRASRC: disp0-y.dat
+EXTRADST: data\disp0-y.dat
+
+EXTRASRC: al0-z.dat
+EXTRADST: data\al0-z.dat
+
+EXTRASRC: bigf0-z.dat
+EXTRADST: data\bigf0-z.dat
+
+EXTRASRC: cliff0-z.dat
+EXTRADST: data\cliff0-z.dat
+
+EXTRASRC: fade0-z.dat
+EXTRADST: data\fade0-z.dat
+
+EXTRASRC: ghost0-z.dat
+EXTRADST: data\ghost0-z.dat
+
+EXTRASRC: pal0-z.dat
+EXTRADST: data\pal0-z.dat
+
+EXTRASRC: sky0-z.dat
+EXTRADST: data\sky0-z.dat
+
+EXTRASRC: disp0-z.dat
+EXTRADST: data\disp0-z.dat
+
+EXTRASRC: BadMoon.lua
+EXTRADST: Scripts\BadMoon.lua
+
+EXTRASRC: ConjoinedTwins.lua
+EXTRADST: Scripts\ConjoinedTwins.lua
+
+EXTRASRC: EyeOfTheStorm.lua
+EXTRADST: Scripts\EyeOfTheStorm.lua
+
+EXTRASRC: fallenangels_allies.lua
+EXTRADST: Scripts\fallenangels_allies.lua
+
+EXTRASRC: LibBuildings.lua
+EXTRADST: Scripts\LibBuildings.lua
+
+EXTRASRC: LibSpellsRali.lua
+EXTRADST: Scripts\LibSpellsRali.lua
+
+EXTRASRC: Locked_Power.lua
+EXTRADST: Scripts\Locked_Power.lua
+
+EXTRASRC: LordsOfWar.lua
+EXTRADST: Scripts\LordsOfWar.lua
+
+EXTRASRC: Rebalance.lua
+EXTRADST: Scripts\Rebalance.lua
+
+EXTRASRC: RebalanceNoHill.lua
+EXTRADST: Scripts\RebalanceNoHill.lua
+
+EXTRASRC: UtilRefs.lua
+EXTRADST: Scripts\UtilRefs.lua
+
+EXTRASRC: Vehicle.lua
+EXTRADST: Scripts\Vehicle.lua
