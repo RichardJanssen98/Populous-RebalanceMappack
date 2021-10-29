@@ -1,3 +1,12 @@
 1.01:
 
 - Fixed textures 5, k, u, y to work with 8p tribes.
+
+1.02:
+
+Fixed Locked Power, the .dat file was corrupt for some reason.
+Relinked the meteor effects in Bad Moon to the stonehead.
+
+Rebalanced Scripts:
+- Made shaman deaths from Angel of Death not give mana more reliable.
+- Disabled casting blast from boats.

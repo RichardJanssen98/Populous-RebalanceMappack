@@ -1,5 +1,5 @@
 PACKNAME: Revival: Regenerated Worlds
-PACKVERSION: 1.01
+PACKVERSION: 1.02
 PACKCREATOR: Ralimurr, JimmyHunter1000, Sky-, Sub_Zero, Lovenji, Keith52
 
 LEVEL: 0
