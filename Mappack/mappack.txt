@@ -1,5 +1,5 @@
 PACKNAME: Revival: Regenerated Worlds
-PACKVERSION: 1.02
+PACKVERSION: 1.04
 PACKCREATOR: Ralimurr, JimmyHunter1000, Sky-, Sub_Zero, Lovenji, Keith52
 
 LEVEL: 0
@@ -30,7 +30,7 @@ LEVEL: 4
 NAME: Eye of the Storm
 DAT: levl2005.dat
 HDR: levl2005.hdr
-CREATOR: JimmyHunter1000, Ralimurr, Bullfrog
+CREATOR: Bullfrog, JimmyHunter1000, Ralimurr, Bullfrog
 
 LEVEL: 5
 NAME: Locked Power

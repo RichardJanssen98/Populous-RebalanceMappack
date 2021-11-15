@@ -184,7 +184,7 @@ function OnTurn()
             sham.u.Pers.u.Owned.LastDamagedBy = TRIBE_NEUTRAL
           end
 
-          if (is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) then
+          if (sham.Flags2 & TF2_IN_AIRSHIP >= 1 or is_person_in_boat(sham) == 1) then
             SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(sham.Pos.D3), function(me)
 					    me.MapWhoList:processList(function(p)
 						    if (p.Type == T_EFFECT) then
@@ -212,10 +212,10 @@ function OnTurn()
     for i=0, 7 do
       local sham = getShaman(i)
       if(sham ~= nil) then
-        if (is_person_in_airship(sham) == 0 and is_person_in_boat(sham) == 0 and is_thing_on_ground(sham) == 1 and (sham.State == S_PERSON_GOTO_BASE_AND_WAIT or sham.State == S_PERSON_UNDER_COMMAND or sham.State == S_PERSON_WAIT_AT_POINT) and shamSwarmHitBools[i] == 1) then
+        if (sham.Flags2 & TF2_IN_AIRSHIP <= 0 and is_person_in_boat(sham) == 0 and is_thing_on_ground(sham) == 1 and (sham.State == S_PERSON_GOTO_BASE_AND_WAIT or sham.State == S_PERSON_UNDER_COMMAND or sham.State == S_PERSON_WAIT_AT_POINT) and shamSwarmHitBools[i] == 1) then
           set_person_new_state(sham, S_PERSON_RUN_AWAY)
           shamSwarmHitBools[i] = 0
-        elseif ((is_person_in_airship(sham) == 1 or is_person_in_boat(sham) == 1) and shamSwarmHitBools[i] == 1) then
+        elseif ((sham.Flags2 & TF2_IN_AIRSHIP >= 1 or is_person_in_boat(sham) == 1) and shamSwarmHitBools[i] == 1) then
           jumpOutCommand = Commands.new()
           jumpOutCommand.CommandType = CMD_GET_OUT_OF_VEHICLE
           add_persons_command(sham, jumpOutCommand, 0)
