@@ -24,6 +24,21 @@ include("Vehicle.lua")
 sti = spells_type_info();
 _constants = constants();
 initializedShamanHealth = 0
+messageNr = 1
+messageDelay = 36
+messages = {
+  "Welcome to the Revival Mod!",
+  "The following changes are important to know:",
+  "Shamans can NOT cast from Balloons or Boats, with the exception of Swarm from Boats.",
+  "Shamans inside a Balloon or Boat that get hit by Swarm will jump out in fear.",
+  "Hill is a new spell and on the bottom left of your spell list.",
+  "You can no longer direct click another Shaman with Lightning.",
+  "Flatten can heal Damaged ground.",
+  "Invisibility and Magical Shield do not stack.",
+  "Vehicles are destructable via Firewarriors and other explosive effects.",
+  "Many more minor changes that can be found by experimenting or exploring the Forum thread.",
+  "Have Fun and Good Luck from the Revival team!"
+}
 
 sti[M_SPELL_INVISIBILITY].Cost = 75000;
 InvisNumPeopleAffected = 4;
@@ -93,6 +108,13 @@ _gsi.SpellsPresentOnLevel = _gsi.SpellsPresentOnLevel | (1 << M_SPELL_BLOODLUST)
 _gsi.Flags = _gsi.Flags | GS_GUEST_SPELLS_CHARGE
 
 function OnTurn()
+  if (everyPow(messageDelay, 1)) then
+    if (messageNr <= #messages) then
+      log_msg(TRIBE_NEUTRAL, messages[messageNr])
+      messageNr = messageNr + 1
+    end
+  end
+
   if (initializedShamanHealth == 0) then
     ProcessGlobalTypeList(T_GENERAL, function(t)
       local destroyMe = 0  
@@ -358,14 +380,16 @@ function OnCreateThing(t)
   if (t.Type == T_SPELL) then
     local shamanOwner = getShaman(t.Owner)
     if (shamanOwner ~= nil) then
-      if (is_person_in_airship(shamanOwner) == 1) then
+      if (shamanOwner.Flags2 & TF2_IN_AIRSHIP >= 1) then
         t.Model = M_SPELL_NONE
+        log_msg(shamanOwner.Owner, "I can not cast from this Balloon!")
       end
       if (is_person_in_boat(shamanOwner) == 1) then
         if (t.Model == M_SPELL_INSECT_PLAGUE) then
           --Just cast pls
         else
           t.Model = M_SPELL_NONE
+          log_msg(shamanOwner.Owner, "I can only cast Swarm/Convert from this Boat!")
         end
       end
     end

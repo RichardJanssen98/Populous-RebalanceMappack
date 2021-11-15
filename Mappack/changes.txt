@@ -19,3 +19,5 @@ Fixed Hill missing from Serpentine Madness
 
 Potentially fixed a rare script error upon shaman death related to balloons.
 Made Blue's base on Conjoined Twins bigger to match Cyan's base.
+Added messages that explain the most important changes in the mod at the start of each level.
+Allowed casting convert from boats.
