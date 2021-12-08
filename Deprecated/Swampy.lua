@@ -30,7 +30,13 @@ function Swampy:new(o, tribe, c3dLocation)
 	o.initialized = 0
 	o.myTiles = {}
 
-	o.numTilesDisabled = 0
+	o.maxTime = 1440
+	o.maxKills = 10
+	
+	o.currentTime = 0
+	o.currentKills = 0
+
+	--o.numTilesDisabled = 0
 
 	return o
 end
@@ -63,6 +69,8 @@ function Swampy:handleSwampy()
 			ensure_point_on_ground(placeLocation)
 			local swampTile = createThing(T_EFFECT, M_EFFECT_SWAMP_MIST, self.tribe, placeLocation, false, false)
 			table.insert(self.myTiles, swampTile)
+			local swampTile = createThing(T_EFFECT, M_EFFECT_SWAMP_MIST, self.tribe, placeLocation, false, false)
+			table.insert(self.myTiles, swampTile)
 		end
 
 		self.initialized = 1
@@ -78,15 +86,16 @@ function Swampy:handleSwampy()
 								SetShamanSwampDeath(p)
 							end
 
-							self.myTiles[i] = nil
+							--self.myTiles[i] = nil
 
-							if (p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
-								DestroyThing(tile)
-							end
+							--if (p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
+							--	DestroyThing(tile)
+							--end
 							
-							self.numTilesDisabled = self.numTilesDisabled + 1
+							--self.numTilesDisabled = self.numTilesDisabled + 1
 
 							p.State = S_PERSON_SWAMP_DROWNING
+							self.currentKills = self.currentKills + 1
 							return false
 						end
 					return true
@@ -96,8 +105,10 @@ function Swampy:handleSwampy()
 			end
 		end
 
-		if (self.numTilesDisabled >= 9) then
+		if (self.currentKills >= self.maxKills or self.currentTime >= self.maxTime) then
 			DeleteSwampFromList(self)
 		end
 	end
+
+	self.currentTime = self.currentTime + 1
 end

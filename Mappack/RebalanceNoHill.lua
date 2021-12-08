@@ -20,6 +20,7 @@ import(Module_Table)
 import(Module_Math)
 include("UtilRefs.lua")
 include("Vehicle.lua")
+include("Swampy.lua")
 
 sti = spells_type_info();
 _constants = constants();
@@ -31,6 +32,7 @@ messages = {
   "The following changes are important to know:",
   "Shamans can NOT cast from Balloons or Boats, with the exception of Swarm from Boats.",
   "Shamans inside a Balloon or Boat that get hit by Swarm will jump out in fear.",
+  "You can only have ONE Angel of Death out at any time!",
   "Hill is a new spell and on the bottom left of your spell list.",
   "You can no longer direct click another Shaman with Lightning.",
   "Flatten can heal Damaged ground.",
@@ -43,8 +45,7 @@ messages = {
 sti[M_SPELL_INVISIBILITY].Cost = 75000;
 InvisNumPeopleAffected = 4;
 
-ignoreSwamp = 0
-
+swampyTable = {}
 aliveShamans = {}
 deadShamans = {}
 deadShamansIntArray = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
@@ -65,6 +66,8 @@ shamFindBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 shamAngelDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 shamSwarmHitBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 shamSwampDeathBools = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+angelTribeTable = {[0]= nil, nil, nil, nil, nil, nil, nil, nil}
+angelCastTable = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
 
 _constants.InvisNumPeopleAffected = 1;
 _constants.ShieldNumPeopleAffected = 1;
@@ -108,6 +111,15 @@ _gsi.SpellsPresentOnLevel = _gsi.SpellsPresentOnLevel | (1 << M_SPELL_BLOODLUST)
 _gsi.Flags = _gsi.Flags | GS_GUEST_SPELLS_CHARGE
 
 function OnTurn()
+  if (everyPow(12, 1)) then
+    for i, tick in pairs(angelCastTable) do
+      if (tick > 0) then 
+        tick = tick - 12
+        angelCastTable[i] = tick
+      end
+    end
+  end
+
   if (everyPow(messageDelay, 1)) then
     if (messageNr <= #messages) then
       log_msg(TRIBE_NEUTRAL, messages[messageNr])
@@ -271,6 +283,10 @@ function OnTurn()
       veh:handleVehicle()
     end
   end
+
+  for i, swmp in pairs(swampyTable) do
+    swmp:handleSwampy()
+  end 
 end
 
 function SetShamanSwampDeath(sham)
@@ -383,6 +399,7 @@ function OnCreateThing(t)
       if (shamanOwner.Flags2 & TF2_IN_AIRSHIP >= 1) then
         t.Model = M_SPELL_NONE
         log_msg(shamanOwner.Owner, "I can not cast from this Balloon!")
+        queue_custom_sound_event(shamanOwner, "balloonoink.wav", 255)
       end
       if (is_person_in_boat(shamanOwner) == 1) then
         if (t.Model == M_SPELL_INSECT_PLAGUE) then
@@ -390,6 +407,7 @@ function OnCreateThing(t)
         else
           t.Model = M_SPELL_NONE
           log_msg(shamanOwner.Owner, "I can only cast Swarm/Convert from this Boat!")
+          queue_custom_sound_event(shamanOwner, "boatoink.wav", 255)
         end
       end
     end
@@ -404,6 +422,19 @@ function OnCreateThing(t)
         if (t.u.Spell.TargetThingIdx:get().Model == M_PERSON_MEDICINE_MAN) then
           t.u.Spell.TargetThingIdx:set(0)
         end
+      end
+    end
+
+    if (t.Model == M_SPELL_ANGEL_OF_DEATH) then
+      if (angelCastTable[t.Owner] == 0) then
+        angelCastTable[t.Owner] = 36
+        if (angelTribeTable[t.Owner] ~= nil) then
+          if (angelTribeTable[t.Owner].u.Pers ~= nil) then
+            angelTribeTable[t.Owner].u.Pers.Life = 0
+          end
+        end
+      else
+        t.Model = M_SPELL_NONE
       end
     end
   end
@@ -474,6 +505,17 @@ function OnCreateThing(t)
   if (t.Type == T_PERSON) then
     if (t.Model == M_PERSON_MEDICINE_MAN) then
       HandleMaxShamanHealth(t)
+
+      --Remove any swamps near me please.
+      for i, swmp in pairs(swampyTable) do
+        if (get_world_dist_xyz(swmp.c3dLocation, t.Pos.D3) <= 2200) then
+          swmp:deleteMe()
+        end
+      end
+    end
+
+    if (t.Model == M_PERSON_ANGEL) then
+      angelTribeTable[t.Owner] = t
     end
   end
 
@@ -498,40 +540,22 @@ function HandleMaxShamanHealth(t)
   end
 end
 
-function HandleSwamp(t)
-  if (ignoreSwamp == 0) then
-    ignoreSwamp = 9
-
-    for i=1, 9 do
-			placeLocation = Coord3D.new()
-			placeLocation = t.Pos.D3
-
-			if (i == 2) then
-				placeLocation.Zpos = placeLocation.Zpos - 512
-			elseif (i == 3) then
-				placeLocation.Xpos = placeLocation.Xpos + 512
-			elseif (i == 4) then
-				placeLocation.Zpos = placeLocation.Zpos + 512
-			elseif (i == 5) then
-				placeLocation.Zpos = placeLocation.Zpos + 512
-			elseif (i == 6) then
-				placeLocation.Xpos = placeLocation.Xpos - 512
-			elseif (i == 7) then
-				placeLocation.Xpos = placeLocation.Xpos - 512
-			elseif (i == 8) then
-				placeLocation.Zpos = placeLocation.Zpos - 512
-			elseif (i == 9) then
-				placeLocation.Zpos = placeLocation.Zpos - 512
-			end
-
-			ensure_point_on_ground(placeLocation)
-			createThing(T_EFFECT, M_EFFECT_SWAMP, t.Owner, placeLocation, false, false)
-	  end
-
-    DestroyThing(t)
-  else
-    ignoreSwamp = ignoreSwamp - 1
+function DeleteSwampFromList(t)
+  for i, swmp in pairs(swampyTable) do
+    if (swmp == t) then
+      table.remove(swampyTable, i)
+    end
   end
+end
+
+function HandleSwamp(t)
+  local swampLoc = Coord3D.new()
+  swampLoc = t.Pos.D3
+  centre_coord3d_on_block(swampLoc)
+  local swampy = Swampy:new(nil, t.Owner, swampLoc)
+  table.insert(swampyTable, swampy)
+  
+  DestroyThing(t)
 end
 
 function HandleFlatten(t)

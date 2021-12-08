@@ -21,3 +21,18 @@ Potentially fixed a rare script error upon shaman death related to balloons.
 Made Blue's base on Conjoined Twins bigger to match Cyan's base.
 Added messages that explain the most important changes in the mod at the start of each level.
 Allowed casting convert from boats.
+
+1.1:
+
+Added new Treacherous Waters (2v2) map.
+Made Red's base on Lords of War slightly bigger.
+Changed Hill's cost from 170000 to 160000.
+Ghost Army spawns one extra brave, it now spawns 4.
+Made it so you can only have one Angel of Death at any point in the game from spells.
+Updated the information messages.
+Added Ashby to mock players for trying to cast from vehicles.
+Reworked swamp to be DoT, it now has a maximum kills of 10 and a timer of 2 minutes, you can not remove swamp anymore.
+
+1.11: 
+
+Fixed Swamp sounds, Thanks Inca <3

@@ -1,5 +1,5 @@
 PACKNAME: Revival: Regenerated Worlds
-PACKVERSION: 1.04
+PACKVERSION: 1.11
 PACKCREATOR: Ralimurr, JimmyHunter1000, Sky-, Sub_Zero, Lovenji, Keith52
 
 LEVEL: 0
@@ -60,6 +60,12 @@ LEVEL: 9
 NAME: Bad Moon
 DAT: levl2010.dat
 HDR: levl2010.hdr
+CREATOR: Ralimurr
+
+LEVEL: A
+NAME: Treacherous Waters
+DAT: levl2011.dat
+HDR: levl2011.hdr
 CREATOR: Ralimurr
 
 EXTRASRC: constant.dat
@@ -269,6 +275,33 @@ EXTRADST: data\sky0-z.dat
 EXTRASRC: disp0-z.dat
 EXTRADST: data\disp0-z.dat
 
+EXTRASRC: al0-8.dat
+EXTRADST: data\al0-8.dat
+
+EXTRASRC: bigf0-8.dat
+EXTRADST: data\bigf0-8.dat
+
+EXTRASRC: cliff0-8.dat
+EXTRADST: data\cliff0-8.dat
+
+EXTRASRC: fade0-8.dat
+EXTRADST: data\fade0-8.dat
+
+EXTRASRC: ghost0-8.dat
+EXTRADST: data\ghost0-8.dat
+
+EXTRASRC: pal0-8.dat
+EXTRADST: data\pal0-8.dat
+
+EXTRASRC: sky0-8.dat
+EXTRADST: data\sky0-8.dat
+
+EXTRASRC: disp0-8.dat
+EXTRADST: data\disp0-8.dat
+
+EXTRASRC: BL320-8.dat
+EXTRADST: data\BL320-8.dat
+
 EXTRASRC: BadMoon.lua
 EXTRADST: Scripts\BadMoon.lua
 
@@ -304,3 +337,12 @@ EXTRADST: Scripts\UtilRefs.lua
 
 EXTRASRC: Vehicle.lua
 EXTRADST: Scripts\Vehicle.lua
+
+EXTRASRC: Swampy.lua
+EXTRADST: Scripts\Swampy.lua
+
+EXTRASRC: boatoink.wav
+EXTRADST: Sound\boatoink.wav
+
+EXTRASRC: balloonoink.wav
+EXTRADST: Sound\balloonoink.wav
