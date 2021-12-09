@@ -21,15 +21,17 @@ import(Module_Math)
 include("UtilRefs.lua")
 include("Vehicle.lua")
 include("Swampy.lua")
+include("Building.lua")
 
 sti = spells_type_info();
 _constants = constants();
 initializedShamanHealth = 0
 messageNr = 1
-messageDelay = 36
+messageDelay = 48
 messages = {
   "Welcome to the Revival Mod!",
   "The following changes are important to know:",
+  "You can NOT dismantle in any way.",
   "Shamans can NOT cast from Balloons or Boats, with the exception of Swarm from Boats.",
   "Shamans inside a Balloon or Boat that get hit by Swarm will jump out in fear.",
   "You can only have ONE Angel of Death out at any time!",
@@ -49,6 +51,9 @@ swampyTable = {}
 aliveShamans = {}
 deadShamans = {}
 deadShamansIntArray = {[0]= 0, 0, 0, 0, 0, 0, 0, 0}
+
+buildingsTable = {}
+sproggedLocationsTable = {}
 
 vehiclesTable = {}
 vehicleHealth = 1000
@@ -279,6 +284,12 @@ function OnTurn()
   end
 
   if (everyPow(1, 1)) then
+    for i, bldg in pairs(buildingsTable) do
+      bldg:handleBuilding()
+    end
+  end
+
+  if (everyPow(1, 1)) then
     for i, veh in pairs(vehiclesTable) do
       veh:handleVehicle()
     end
@@ -291,6 +302,40 @@ end
 
 function SetShamanSwampDeath(sham)
   shamSwampDeathBools[sham.Owner] = 1
+end
+
+function AddSproggedToList(bldLocation) 
+  if (bldLocation ~= nil) then
+    table.insert(sproggedLocationsTable, bldLocation)
+  end
+end
+
+function CheckIfSproggedThisLocation(bldLocation)
+  local result = 0
+
+  for i, loc in pairs(sproggedLocationsTable) do
+    if (get_world_dist_xyz(bldLocation, loc) <= 50) then
+      result = 1
+    end
+  end
+
+  return result
+end
+
+function DeleteBuildingFromList(t, locationToo)
+  for i, bld in pairs(buildingsTable) do
+    if (bld == t) then
+      table.remove(buildingsTable, i)
+    end
+  end
+
+  if (locationToo == 1) then
+    for j, loc in pairs(sproggedLocationsTable) do
+      if (loc.Xpos == t.location.Xpos and loc.Zpos == t.location.Zpos) then
+        table.remove(sproggedLocationsTable, j)
+      end
+    end
+  end
 end
 
 function DeleteVehicleFromList(t)
@@ -393,6 +438,13 @@ function OnCreateThing(t)
     table.insert(vehiclesTable, vehicle)
   end
 
+  if (t.Type == T_BUILDING) then
+    if (t.Model == M_BUILDING_TEPEE or t.Model == M_BUILDING_TEPEE_2 or t.Model == M_BUILDING_TEPEE_3) then
+      local building = Building:new(nil, t, t.Pos.D3)
+      table.insert(buildingsTable, building)
+    end
+  end
+
   if (t.Type == T_SPELL) then
     local shamanOwner = getShaman(t.Owner)
     if (shamanOwner ~= nil) then
@@ -440,6 +492,15 @@ function OnCreateThing(t)
   end
 
   if (t.Type == T_EFFECT) then
+    if (t.Model == M_EFFECT_BLDG_DAMAGED_SMOKE) then
+      for i, bldg in pairs(buildingsTable) do
+        local shouldStop = bldg:buildingBecomingDamaged(t)
+        if (shouldStop == 1) then
+          break
+        end
+      end
+    end
+
     if (t.Model == M_EFFECT_GHOST_ARMY) then
       HandleGhostArmy(t)
     elseif (t.Model == M_EFFECT_INVISIBILITY or t.Model == M_EFFECT_SHIELD or t.Model == M_EFFECT_BLOODLUST) then
