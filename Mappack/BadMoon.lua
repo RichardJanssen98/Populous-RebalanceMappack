@@ -20,6 +20,7 @@ import(Module_Table)
 import(Module_Math)
 include("LibBuildings.lua")
 include("LibSpellsRali.lua")
+include("UtilRefs.lua")
 
 local ReincPos = {
   MAP_XZ_2_WORLD_XYZ(230, 192), -- Team 1
@@ -48,6 +49,8 @@ sti[M_SPELL_FLATTEN].OneOffMaximum = 1;
 sti[M_SPELL_WHIRLWIND].OneOffMaximum = 1;
 sti[M_SPELL_EROSION].OneOffMaximum = 1;
 sti[M_SPELL_BLOODLUST].OneOffMaximum = 1;
+
+hillRemoved = 0
 
 blueShaman = nil
 redShaman = nil
@@ -169,6 +172,22 @@ for i, v in ipairs(teamTwo) do
     for k, t in ipairs(teamTwo) do
         set_players_allied(v, t)
     end
+end
+
+function OnTurn()
+  if (hillRemoved == 0 and everyPow(12, 1)) then
+    for i=0, 7 do
+      _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable ~ (1 << M_SPELL_BLOODLUST)
+    end
+
+    _gsi.ThisLevelInfo.PlayerThings[redShaman.Owner].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[redShaman.Owner].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
+    _gsi.ThisLevelInfo.PlayerThings[redShaman.Owner].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[redShaman.Owner].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
+
+    _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
+    _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
+    
+    hillRemoved = 1
+  end
 end
 
 function OnTrigger(trigger)

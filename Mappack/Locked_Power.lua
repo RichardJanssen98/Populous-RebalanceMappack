@@ -43,6 +43,7 @@ cyanShaman = nil
 pinkShaman = nil
 
 _gsi = gsi();
+hillRemoved = 0
 
 -- Setting up both teams
 for i,k in ipairs(ReincPos) do
@@ -125,6 +126,20 @@ for i, v in ipairs(teamTwo) do
 end
 
 function OnTurn()  
+  if (hillRemoved == 0 and everyPow(12, 1)) then
+    for i=0, 7 do
+      _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable ~ (1 << M_SPELL_BLOODLUST)
+    end
+    
+    _gsi.ThisLevelInfo.PlayerThings[yellowShaman.Owner].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[yellowShaman.Owner].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
+    _gsi.ThisLevelInfo.PlayerThings[yellowShaman.Owner].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[yellowShaman.Owner].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
+
+    _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
+    _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[pinkShaman.Owner].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
+
+    hillRemoved = 1
+  end
+
   if (yellowShaman ~= nil) then
     if (yellowShaman.State == S_PERSON_DYING or yellowShaman.State == S_PERSON_DROWNING or yellowShaman.State == S_PERSON_ELECTROCUTED or yellowShaman.State == S_PERSON_SWAMP_DROWNING) then
       local c2d = Coord2D.new()

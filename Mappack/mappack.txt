@@ -1,5 +1,5 @@
 PACKNAME: Revival: Regenerated Worlds
-PACKVERSION: 1.11
+PACKVERSION: 1.12
 PACKCREATOR: Ralimurr, JimmyHunter1000, Sky-, Sub_Zero, Lovenji, Keith52
 
 LEVEL: 0
@@ -329,9 +329,6 @@ EXTRADST: Scripts\LordsOfWar.lua
 EXTRASRC: Rebalance.lua
 EXTRADST: Scripts\Rebalance.lua
 
-EXTRASRC: RebalanceNoHill.lua
-EXTRADST: Scripts\RebalanceNoHill.lua
-
 EXTRASRC: UtilRefs.lua
 EXTRADST: Scripts\UtilRefs.lua
 
@@ -340,6 +337,9 @@ EXTRADST: Scripts\Vehicle.lua
 
 EXTRASRC: Swampy.lua
 EXTRADST: Scripts\Swampy.lua
+
+EXTRASRC: Building.lua
+EXTRADST: Scripts\Building.lua
 
 EXTRASRC: boatoink.wav
 EXTRADST: Sound\boatoink.wav

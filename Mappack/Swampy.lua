@@ -127,15 +127,13 @@ function Swampy:handleSwampy()
 	end
 
 	if (everyPow(3, 1)) then
+		local unitsDamaged = 0
+
 		for i, tile in pairs(self.myTiles) do
 			if (tile ~= nil) then
 				SearchMapCells(CIRCULAR, 0, 0, 0, world_coord3d_to_map_idx(tile.Pos.D3), function(me)
 					me.MapWhoList:processList(function(p)
-						if (p.Type == T_PERSON and is_thing_on_ground(p) == 1) then
-							if (p.Model == M_PERSON_MEDICINE_MAN and p.Owner ~= tile.Owner) then
-								SetShamanSwampDeath(p)
-							end
-
+						if (p.Type == T_PERSON and is_thing_on_ground(p) == 1 and unitsDamaged < 10) then
 							--self.myTiles[i] = nil
 
 							--if (p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
@@ -145,8 +143,12 @@ function Swampy:handleSwampy()
 							--self.numTilesDisabled = self.numTilesDisabled + 1
 							p.u.Pers.u.Owned.LastDamagedBy = tile.Owner
 							p.u.Pers.Life = p.u.Pers.Life - 350
+							unitsDamaged = unitsDamaged + 1
 
-							if (p.u.Pers.Life <= 0) then
+							if (p.u.Pers.Life <= 0 and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
+								if (p.Model == M_PERSON_MEDICINE_MAN and p.Owner ~= tile.Owner) then
+									SetShamanSwampDeath(p)
+								end
 								self.currentKills = self.currentKills + 1
 							end
 						end
@@ -172,4 +174,48 @@ function Swampy:handleSwampy()
 	end
 
 	self.currentTime = self.currentTime + 1
+end
+
+Ghosts = {tribe = 0}
+Ghosts.__index = Ghosts
+
+function Ghosts:new(o, tribe, maximumGhosts)
+	local o = o or {}
+	setmetatable(o, Ghosts)
+
+	o.tribe = tribe
+	o.maximumGhosts = maximumGhosts
+
+	o.ghostsTable = {}
+
+	return o
+end
+
+function Ghosts:addGhost(thing)
+	table.insert(self.ghostsTable, thing)
+end
+
+function Ghosts:killExcessGhosts()
+	for i, ghst in pairs(self.ghostsTable) do
+		--First clean up any dead ghosts from the table.
+		if (ghst == nil or ghst.u.Pers == nil) then
+			table.remove(self.ghostsTable, i)
+		end
+	end
+
+	if (tableLength(self.ghostsTable) > self.maximumGhosts) then
+		local amountToKill = tableLength(self.ghostsTable) - self.maximumGhosts
+
+		for j, g in pairs(self.ghostsTable) do
+			if (amountToKill > 0) then
+				if (g.u.Pers ~= nil) then
+					g.u.Pers.Life = 0
+					table.remove(self.ghostsTable, j)
+					amountToKill = amountToKill - 1
+				end
+			else
+				break
+			end
+		end
+	end
 end

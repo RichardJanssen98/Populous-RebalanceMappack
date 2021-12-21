@@ -36,3 +36,14 @@ Reworked swamp to be DoT, it now has a maximum kills of 10 and a timer of 2 minu
 1.11: 
 
 Fixed Swamp sounds, Thanks Inca <3
+
+1.12:
+
+No more dismantling in any way.
+Removed Ashby oinks, but kept normal Ashby.
+Fixed Swamp counting ghosts as kills.
+Fixed Swamp killing more than 10 if cast on a large group standing still.
+Fixed Ghosts not making sound.
+Reworked Ghosts to be more of a distraction and illusion than being real units.
+Lowered health on vehicles, balloons have less health than boats.
+Advanced Chaos now spawns units like World Wide Web from Totems instead of giving spells.

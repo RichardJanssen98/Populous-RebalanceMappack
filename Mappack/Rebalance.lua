@@ -46,7 +46,9 @@ messages = {
 
 sti[M_SPELL_INVISIBILITY].Cost = 75000;
 InvisNumPeopleAffected = 4;
+maximumGhosts = 60
 
+ghostsTable = {}
 swampyTable = {}
 aliveShamans = {}
 deadShamans = {}
@@ -56,7 +58,8 @@ buildingsTable = {}
 sproggedLocationsTable = {}
 
 vehiclesTable = {}
-vehicleHealth = 1000
+vehicleHealthBoat = 800
+vehicleHealthBalloon = 600
 
 lightningBolts = {}
 vehicleDamageFirewarriorBlast = 50 --Firewarriors seem to be doing double damage? Perhaps per fireball
@@ -84,7 +87,7 @@ BloodlustNumPeopleAffected = 3;
 sti[M_SPELL_SHIELD].Cost = 75000;
 ShieldNumPeopleAffected = 4;
 
-sti[M_SPELL_GHOST_ARMY].Cost = 20000;
+--sti[M_SPELL_GHOST_ARMY].Cost = 20000;
 sti[M_SPELL_EARTHQUAKE].Cost = 240000;
 sti[M_SPELL_EARTHQUAKE].WorldCoordRange = 3072;
 sti[M_SPELL_EROSION].Cost = 175000;
@@ -115,6 +118,11 @@ _gsi.SpellsPresentOnLevel = _gsi.SpellsPresentOnLevel | (1 << M_SPELL_BLOODLUST)
 --set_special_guest_spell_model(M_SPELL_ARMAGEDDON)
 _gsi.Flags = _gsi.Flags | GS_GUEST_SPELLS_CHARGE
 
+--[[_constants.IdleBravesMana = 4
+_constants.BusyBravesMana = 15
+_constants.IdleSpecialistsMana = 4
+_constants.BusySpecialistsMana = 5--]]
+
 function OnTurn()
   if (everyPow(12, 1)) then
     for i, tick in pairs(angelCastTable) do
@@ -122,6 +130,10 @@ function OnTurn()
         tick = tick - 12
         angelCastTable[i] = tick
       end
+    end
+
+    for j, ghosts in pairs(ghostsTable) do
+      ghosts:killExcessGhosts()
     end
   end
 
@@ -161,8 +173,6 @@ function OnTurn()
     return true
     end)
 
-    
-    
     for i=0, 7 do
       _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable = _gsi.ThisLevelInfo.PlayerThings[i].SpellsAvailable | (1 << M_SPELL_BLOODLUST)
       _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging = _gsi.ThisLevelInfo.PlayerThings[i].SpellsNotCharging ~ (1 << M_SPELL_BLOODLUST-1)
@@ -171,6 +181,8 @@ function OnTurn()
 
       if (shaman ~= nil) then
         HandleMaxShamanHealth(shaman)
+        local tempGhost = Ghosts:new(nil, shaman.Owner, maximumGhosts)
+        table.insert(ghostsTable, tempGhost)
       end
     end
     initializedShamanHealth = 1
@@ -178,9 +190,16 @@ function OnTurn()
     --Put any vehicles into the vehicles list just in case the map has some pre made vehicles
     ProcessGlobalTypeList(T_VEHICLE, function(t)
       if (t.Type == T_VEHICLE) then
-        local maxHealth = math.floor(vehicleHealth * 0.75) + G_RANDOM(math.floor(vehicleHealth * 0.25))
-        local vehicle = Vehicle:new(nil, t.Owner, maxHealth, t) --Simulate random unit health. The unit gets 75% of its max health for free and then the last 25% is a random range.
-        table.insert(vehiclesTable, vehicle)
+        if (t.Model == M_VEHICLE_AIRSHIP_1 or t.Model == M_VEHICLE_AIRSHIP_2) then
+          local maxHealth = math.floor(vehicleHealthBalloon * 0.75) + G_RANDOM(math.floor(vehicleHealthBalloon * 0.25))
+          local vehicle = Vehicle:new(nil, t.Owner, maxHealth, t) --Simulate random unit health. The unit gets 75% of its max health for free and then the last 25% is a random range.
+          table.insert(vehiclesTable, vehicle)
+        end
+        if (t.Model == M_VEHICLE_BOAT_1 or t.Model == M_VEHICLE_BOAT_2) then
+          local maxHealth = math.floor(vehicleHealthBoat * 0.75) + G_RANDOM(math.floor(vehicleHealthBoat * 0.25))
+          local vehicle = Vehicle:new(nil, t.Owner, maxHealth, t) --Simulate random unit health. The unit gets 75% of its max health for free and then the last 25% is a random range.
+          table.insert(vehiclesTable, vehicle)
+        end
       end
     return true
     end)
@@ -434,9 +453,16 @@ end
 
 function OnCreateThing(t)
   if (t.Type == T_VEHICLE) then
-    local maxHealth = math.floor(vehicleHealth * 0.75) + G_RANDOM(math.floor(vehicleHealth * 0.25))
-    local vehicle = Vehicle:new(nil, t.Owner, maxHealth, t) --Simulate random unit health. The unit gets 75% of its max health for free and then the last 25% is a random range.
-    table.insert(vehiclesTable, vehicle)
+        if (t.Model == M_VEHICLE_AIRSHIP_1 or t.Model == M_VEHICLE_AIRSHIP_2) then
+          local maxHealth = math.floor(vehicleHealthBalloon * 0.75) + G_RANDOM(math.floor(vehicleHealthBalloon * 0.25))
+          local vehicle = Vehicle:new(nil, t.Owner, maxHealth, t) --Simulate random unit health. The unit gets 75% of its max health for free and then the last 25% is a random range.
+          table.insert(vehiclesTable, vehicle)
+        end
+        if (t.Model == M_VEHICLE_BOAT_1 or t.Model == M_VEHICLE_BOAT_2) then
+          local maxHealth = math.floor(vehicleHealthBoat * 0.75) + G_RANDOM(math.floor(vehicleHealthBoat * 0.25))
+          local vehicle = Vehicle:new(nil, t.Owner, maxHealth, t) --Simulate random unit health. The unit gets 75% of its max health for free and then the last 25% is a random range.
+          table.insert(vehiclesTable, vehicle)
+        end
   end
 
   if (t.Type == T_BUILDING) then
@@ -550,7 +576,7 @@ function OnCreateThing(t)
         me.MapWhoList:processList(function(p)
           if (p.Type == T_BUILDING) then
             if (p.Model == M_BUILDING_DRUM_TOWER) then
-              fwDmg = fwDmg * 2
+              fwDmg = fwDmg * 4
               return false
             end
           end
@@ -572,6 +598,17 @@ function OnCreateThing(t)
       for i, swmp in pairs(swampyTable) do
         if (get_world_dist_xyz(swmp.c3dLocation, t.Pos.D3) <= 2200) then
           swmp:deleteMe()
+        end
+      end
+    end
+
+    if (t.Flags2 & TF2_THING_IS_A_GHOST_PERSON >= 1 and t.Model ~= M_PERSON_MEDICINE_MAN) then
+      t.u.Pers.MaxLife = 1
+      t.u.Pers.Life = 1
+
+      for j, l in pairs(ghostsTable) do
+        if (l.tribe == t.Owner) then
+          ghostsTable[j]:addGhost(t)
         end
       end
     end
@@ -632,43 +669,21 @@ end
 
 function HandleGhostArmy(t)
   local createdGhosts = 0
+  local ghost = nil
 
   SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
   me.MapWhoList:processList(function(p)
     if (p.Type == T_PERSON and createdGhosts == 0) then
       if (p.Model == M_PERSON_MEDICINE_MAN and p.Owner == t.Owner) then
-        createThing(T_PERSON, M_PERSON_MEDICINE_MAN, t.Owner, t.Pos.D3, false, true)
+        ghost = createThing(T_PERSON, M_PERSON_MEDICINE_MAN, t.Owner, t.Pos.D3, false, true)
+
         createdGhosts = 1
         return false
-      elseif (p.Model == M_PERSON_WARRIOR and p.Owner == t.Owner) then
-        createThing(T_PERSON, M_PERSON_WARRIOR, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_WARRIOR, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_WARRIOR, t.Owner, t.Pos.D3, false, true)
-        createdGhosts = 1
-        return false
-      elseif (p.Model == M_PERSON_SUPER_WARRIOR and p.Owner == t.Owner) then
-        createThing(T_PERSON, M_PERSON_SUPER_WARRIOR, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_SUPER_WARRIOR, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_SUPER_WARRIOR, t.Owner, t.Pos.D3, false, true)
-        createdGhosts = 1
-        return false
-      elseif (p.Model == M_PERSON_RELIGIOUS and p.Owner == t.Owner) then
-        createThing(T_PERSON, M_PERSON_RELIGIOUS, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_RELIGIOUS, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_RELIGIOUS, t.Owner, t.Pos.D3, false, true)
-        createdGhosts = 1
-        return false
-      elseif (p.Model == M_PERSON_SPY and p.Owner == t.Owner) then
-        createThing(T_PERSON, M_PERSON_SPY, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_SPY, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_SPY, t.Owner, t.Pos.D3, false, true)
-        createdGhosts = 1
-        return false
-      elseif (p.Model == M_PERSON_BRAVE and p.Owner == t.Owner) then
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
+      elseif (p.Model ~= M_PERSON_MEDICINE_MAN and p.Owner == t.Owner) then
+        for i=1, 6 do
+          ghost = createThing(T_PERSON, p.Model, t.Owner, t.Pos.D3, false, true)
+        end
+
         createdGhosts = 1
         return false
       end
@@ -679,10 +694,11 @@ function HandleGhostArmy(t)
     end)
 
     if (createdGhosts == 0) then
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
-        createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
+      for i=1, 6 do
+        ghost = createThing(T_PERSON, M_PERSON_BRAVE, t.Owner, t.Pos.D3, false, true)
+
         createdGhosts = 1
+      end 
     end
     
     c3d = Coord3D.new()
@@ -693,9 +709,12 @@ function HandleGhostArmy(t)
       createThing(T_EFFECT, M_EFFECT_SMOKE, TRIBE_NEUTRAL, c3d, false, false)
     end
 
-    DestroyThing(t)
+    if (ghost ~= nil) then
+      --Queueing the spell effect with a custom sound because the normal queue doesn't actually play it.
+      queue_custom_sound_event(ghost, "43_ghost.wav", 255)
+    end
 
-    queue_sound_event(nil, SND_EVENT_SP_GHOST, SEF_FIXED_VARS)
+    DestroyThing(t)
 end
 
 function HandleBuffingSpells(t)
@@ -727,7 +746,7 @@ function HandleBuffingSpells(t)
   SearchMapCells(SQUARE, 0, 0, 1, world_coord3d_to_map_idx(t.Pos.D3), function(me)
   me.MapWhoList:processList(function(p)
     if (p.Type == T_PERSON) then
-      if (p.Model ~= M_PERSON_MEDICINE_MAN and (p.Owner == t.Owner or are_players_allied(p.Owner, t.Owner) >= 1) and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0) then
+      if (p.Model ~= M_PERSON_MEDICINE_MAN and (p.Owner == t.Owner or are_players_allied(p.Owner, t.Owner) >= 1) and p.Flags2 & TF2_THING_IS_A_GHOST_PERSON == 0 and p.Model ~= M_PERSON_WILD) then
         unitsFound[unitsFoundCount] = p
         unitsFoundCount = unitsFoundCount + 1
       end
